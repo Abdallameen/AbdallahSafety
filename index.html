@@ -302,14 +302,30 @@
     .btn-print:hover { background: var(--green-mid); }
 
     @media print {
-      body { padding: 0; background: white; }
-      .controls { display: none; }
-      .poster { box-shadow: none; border-radius: 0; width: 100%; }
-      .product-card input[type="file"],
-      .qr-box input[type="file"],
-      .logo-box input[type="file"],
-      .remove-btn { display: none !important; }
-    }
+  body { 
+    padding: 0; 
+    background: white !important; 
+    -webkit-print-color-adjust: exact; /* مهم جداً لكروم وإيدج */
+    print-color-adjust: exact;         /* للمتصفحات الأخرى */
+  }
+  .controls { display: none !important; }
+  .poster { 
+    box-shadow: none; 
+    border-radius: 0; 
+    width: 100%; 
+    border: 6px solid #1a4a2e !important; /* التأكد من ظهور الإطار */
+  }
+  .product-card {
+    border: 2px solid #2d6a4f !important;
+    -webkit-print-color-adjust: exact;
+  }
+  /* التأكد من ظهور خلفيات الهيدر والبانرات */
+  .header, .middle-banner, .footer {
+    background: linear-gradient(135deg, #1a4a2e 60%, #2d6a4f) !important;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
   </style>
 </head>
 <body>
