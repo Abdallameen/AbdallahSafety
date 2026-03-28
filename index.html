@@ -2,10 +2,11 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-  <title>كتالوج المنتجات - متجاوب</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>كتالوج المنتجات - احترافي</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet"/>
   <style>
+    /* --- نفس الـ CSS الخاص بك مع بعض التعديلات الطفيفة --- */
     :root {
       --green-dark: #1a4a2e;
       --green-mid: #2d6a4f;
@@ -20,52 +21,49 @@
       --badge-num: #ffffff;
     }
 
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Cairo', sans-serif;
       background: var(--bg);
       min-height: 100vh;
-      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
     }
 
-    /* تحسين: جعل الكتالوج مرناً */
     .poster {
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
+      width: 900px;
+      max-width: 100%;
       background: var(--white);
-      border: 4px solid var(--green-dark);
+      border: 6px solid var(--green-dark);
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 8px 40px rgba(0,0,0,0.18);
     }
 
-    /* ===== HEADER متجاوب ===== */
+    /* ===== HEADER ===== */
     .header {
       background: linear-gradient(135deg, var(--green-dark) 60%, var(--green-mid));
-      padding: 16px 20px;
+      padding: 18px 30px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 20px;
       flex-wrap: wrap;
     }
 
     .logo-area {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       flex-shrink: 0;
     }
 
     .logo-box {
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       background: rgba(255,255,255,0.12);
       border: 2px dashed rgba(255,255,255,0.5);
       border-radius: 12px;
@@ -78,48 +76,26 @@
       position: relative;
       overflow: hidden;
     }
-    
-    @media (min-width: 768px) {
-      .logo-box {
-        width: 80px;
-        height: 80px;
-      }
-    }
-    
     .logo-box:hover { background: rgba(255,255,255,0.2); }
     .logo-box img { width: 100%; height: 100%; object-fit: contain; display: none; border-radius: 10px; }
-    .logo-box .placeholder { font-size: 10px; color: rgba(255,255,255,0.7); text-align: center; line-height: 1.3; }
+    .logo-box .placeholder { font-size: 11px; color: rgba(255,255,255,0.7); text-align: center; line-height: 1.4; }
     .logo-box input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
     .header-title {
       text-align: center;
       flex: 1;
-      min-width: 150px;
     }
     .header-title .available {
-      font-size: 20px;
+      font-size: 30px;
       font-weight: 900;
       color: var(--gold-light);
       letter-spacing: 1px;
       text-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
-    
-    @media (min-width: 768px) {
-      .header-title .available {
-        font-size: 30px;
-      }
-    }
-    
     .header-title .subtitle {
-      font-size: 12px;
+      font-size: 15px;
       color: rgba(255,255,255,0.88);
       margin-top: 2px;
-    }
-    
-    @media (min-width: 768px) {
-      .header-title .subtitle {
-        font-size: 15px;
-      }
     }
 
     .qr-area {
@@ -130,8 +106,8 @@
       flex-shrink: 0;
     }
     .qr-box {
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       background: var(--white);
       border-radius: 10px;
       display: flex;
@@ -143,52 +119,22 @@
       overflow: hidden;
       border: 2px solid rgba(255,255,255,0.3);
     }
-    
-    @media (min-width: 768px) {
-      .qr-box {
-        width: 80px;
-        height: 80px;
-      }
-    }
-    
     .qr-box img { width: 100%; height: 100%; object-fit: contain; display: none; }
-    .qr-box .placeholder { font-size: 8px; color: var(--green-dark); text-align: center; line-height: 1.3; }
-    .qr-label { font-size: 9px; color: rgba(255,255,255,0.7); }
-    
-    @media (min-width: 768px) {
-      .qr-label { font-size: 10px; }
-    }
+    .qr-box .placeholder { font-size: 10px; color: var(--green-dark); text-align: center; line-height: 1.4; }
+    .qr-box input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .qr-label { font-size: 10px; color: rgba(255,255,255,0.7); }
 
-    /* ===== GRID متجاوب ===== */
+    /* ===== GRID ===== */
     .grid-section {
-      padding: 16px;
+      padding: 20px;
       background: var(--bg);
     }
 
-    /* شبكة مرنة */
+    /* تحسين مهم: شبكة واحدة متسقة */
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-    
-    /* على الشاشات المتوسطة (تابلت) */
-    @media (min-width: 640px) {
-      .products-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-      }
-    }
-    
-    /* على الشاشات الكبيرة (ديسكتوب) */
-    @media (min-width: 1024px) {
-      .products-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
-      }
-      .grid-section {
-        padding: 20px;
-      }
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
     }
 
     /* المنتج (البطاقة) */
@@ -209,14 +155,14 @@
 
     .badge {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 24px;
-      height: 24px;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
       background: var(--badge-bg);
       color: var(--badge-num);
       border-radius: 50%;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -224,22 +170,12 @@
       z-index: 3;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    
-    @media (min-width: 768px) {
-      .badge {
-        top: 8px;
-        right: 8px;
-        width: 28px;
-        height: 28px;
-        font-size: 13px;
-      }
-    }
 
     .product-card img.product-img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      padding: 8px;
+      padding: 10px;
       display: none;
     }
 
@@ -248,32 +184,17 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       color: var(--green-mid);
-      font-size: 11px;
+      font-size: 13px;
       text-align: center;
       pointer-events: none;
-      padding: 8px;
     }
-    
-    @media (min-width: 768px) {
-      .add-placeholder {
-        font-size: 13px;
-        gap: 8px;
-      }
-    }
-    
     .add-placeholder .plus {
-      font-size: 24px;
+      font-size: 32px;
       font-weight: 300;
       line-height: 1;
       color: var(--green-light);
-    }
-    
-    @media (min-width: 768px) {
-      .add-placeholder .plus {
-        font-size: 32px;
-      }
     }
 
     .product-card input[type="file"] {
@@ -286,8 +207,8 @@
 
     .remove-btn {
       position: absolute;
-      top: 6px;
-      left: 6px;
+      top: 8px;
+      left: 8px;
       width: 22px;
       height: 22px;
       background: #e74c3c;
@@ -303,7 +224,7 @@
       z-index: 4;
     }
 
-    /* البانر الأوسط (متجاوب) */
+    /* البانر الأوسط (الخاص بالصف الثاني والثالث) */
     .middle-banner {
       background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
       border-radius: 12px;
@@ -311,149 +232,53 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px 8px;
+      padding: 16px 10px;
       text-align: center;
       border: 2.5px solid var(--green-dark);
-      aspect-ratio: 4/3;
+      aspect-ratio: 4/3; /* لجعله بنفس حجم المنتجات */
     }
-    
-    .middle-banner .megaphone { 
-      font-size: 24px; 
-      margin-bottom: 6px; 
-    }
-    
-    @media (min-width: 768px) {
-      .middle-banner .megaphone { 
-        font-size: 28px; 
-        margin-bottom: 8px; 
-      }
-    }
-    
-    .middle-banner .title-ar { 
-      font-size: 16px; 
-      font-weight: 900; 
-      color: var(--gold-light); 
-      line-height: 1.2; 
-    }
-    
-    @media (min-width: 768px) {
-      .middle-banner .title-ar { 
-        font-size: 20px; 
-      }
-    }
-    
-    .middle-banner .title-en { 
-      font-size: 14px; 
-      font-weight: 900; 
-      color: var(--white); 
-    }
-    
-    @media (min-width: 768px) {
-      .middle-banner .title-en { 
-        font-size: 18px; 
-      }
-    }
-    
-    .middle-banner .desc { 
-      font-size: 10px; 
-      color: rgba(255,255,255,0.85); 
-      margin-top: 4px; 
-      line-height: 1.4; 
-    }
-    
-    @media (min-width: 768px) {
-      .middle-banner .desc { 
-        font-size: 12px; 
-        margin-top: 6px; 
-      }
-    }
+    .middle-banner .megaphone { font-size: 28px; margin-bottom: 8px; }
+    .middle-banner .title-ar { font-size: 20px; font-weight: 900; color: var(--gold-light); line-height: 1.2; }
+    .middle-banner .title-en { font-size: 18px; font-weight: 900; color: var(--white); }
+    .middle-banner .desc { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 6px; line-height: 1.5; }
 
-    /* ===== FOOTER متجاوب ===== */
+    /* ===== FOOTER ===== */
     .footer {
       background: linear-gradient(135deg, var(--green-dark) 60%, var(--green-mid));
-      padding: 12px 20px;
+      padding: 14px 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 16px;
       flex-wrap: wrap;
-    }
-    
-    @media (min-width: 768px) {
-      .footer {
-        padding: 14px 30px;
-        gap: 16px;
-      }
     }
 
     .footer-text {
       text-align: center;
     }
-    .footer-text .discover-ar { 
-      font-size: 14px; 
-      font-weight: 700; 
-      color: var(--gold-light); 
-    }
-    
-    @media (min-width: 768px) {
-      .footer-text .discover-ar { 
-        font-size: 17px; 
-      }
-    }
-    
-    .footer-text .discover-en { 
-      font-size: 12px; 
-      font-weight: 600; 
-      color: rgba(255,255,255,0.9); 
-    }
-    
-    @media (min-width: 768px) {
-      .footer-text .discover-en { 
-        font-size: 15px; 
-      }
-    }
+    .footer-text .discover-ar { font-size: 17px; font-weight: 700; color: var(--gold-light); }
+    .footer-text .discover-en { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9); }
 
     .link-box {
       background: var(--white);
       border-radius: 30px;
-      padding: 6px 16px;
+      padding: 8px 20px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      min-width: 200px;
-      flex: 1;
-      max-width: 100%;
+      gap: 10px;
+      min-width: 260px;
     }
-    
-    @media (min-width: 768px) {
-      .link-box {
-        padding: 8px 20px;
-        min-width: 260px;
-      }
-    }
-    
-    .link-box .wa-icon { 
-      font-size: 18px; 
-      flex-shrink: 0;
-    }
-    
+    .link-box .wa-icon { font-size: 22px; }
     .link-box input[type="text"] {
       border: none;
       outline: none;
       font-family: 'Cairo', sans-serif;
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-dark);
       width: 100%;
       text-align: right;
       background: transparent;
     }
-    
-    @media (min-width: 768px) {
-      .link-box input[type="text"] {
-        font-size: 13px;
-      }
-    }
-    
     .link-box input::placeholder { color: #999; }
 
     /* ===== PRINT BUTTON ===== */
@@ -476,40 +301,23 @@
     }
     .btn-print:hover { background: var(--green-mid); }
 
-    /* تحسين الطباعة */
     @media print {
-      body { 
-        padding: 0; 
-        background: white; 
-      }
-      .controls { 
-        display: none; 
-      }
-      .poster { 
-        box-shadow: none; 
-        border-radius: 0; 
-        max-width: 100%;
-        margin: 0;
-        border: 1px solid #ccc;
-      }
+      body { padding: 0; background: white; }
+      .controls { display: none; }
+      .poster { box-shadow: none; border-radius: 0; width: 100%; }
       .product-card input[type="file"],
       .qr-box input[type="file"],
       .logo-box input[type="file"],
-      .remove-btn { 
-        display: none !important; 
-      }
-      .products-grid {
-        gap: 8px;
-      }
+      .remove-btn { display: none !important; }
     }
   </style>
 </head>
 <body>
 
-<div style="width: 100%;">
+<div>
   <div class="poster" id="poster">
 
-    <!-- HEADER -->
+    <!-- HEADER (نفس الهيكل) -->
     <div class="header">
       <div class="logo-area">
         <div class="logo-box" id="logoBox" title="اضغط لإضافة اللوجو">
@@ -517,13 +325,13 @@
           <span class="placeholder">🏷️<br/>أضف اللوجو</span>
           <input type="file" accept="image/*" id="logoInput"/>
         </div>
-        <div style="color:rgba(255,255,255,0.6); font-size:10px; text-align:center; line-height:1.4;">
+        <div style="color:rgba(255,255,255,0.6); font-size:11px; text-align:center; line-height:1.6;">
           لوجو<br/>الشركة
         </div>
       </div>
 
       <div class="header-title">
-        <div class="available">📢 متوفر الآن!</div>
+        <div class="available">📢 متوفر الآن! | Available!</div>
         <div class="subtitle">تخفيضات موسمية مميزة على جميع الموديلات.</div>
       </div>
 
@@ -537,10 +345,11 @@
       </div>
     </div>
 
-    <!-- GRID -->
+    <!-- GRID: شبكة واحدة فقط تحتوي على كل العناصر (منتجات + بانرات) -->
     <div class="grid-section">
       <div class="products-grid" id="productsGrid">
-        <!-- سيتم إنشاؤها بواسطة JavaScript -->
+        <!-- سندمج هنا المنتجات مع البانرات المحددة -->
+        <!-- سيتم إنشاؤها بواسطة JavaScript لضمان المرونة وحفظ البيانات -->
       </div>
     </div>
 
@@ -564,30 +373,37 @@
 </div>
 
 <script>
-  // --- بيانات المنتجات
+  // --- بيانات المنتجات (لتسهيل الإدارة والحفظ)
+  // تعريف هيكل الجريد: إما "product" أو "banner"
   const gridStructure = [
     { type: 'product', id: 0, badge: 1 },
-    { type: 'banner', variant: 'main' },
+    { type: 'banner', variant: 'main' }, // البانر الأول (متوفر الآن)
     { type: 'product', id: 1, badge: 2 },
     { type: 'product', id: 2, badge: 3 },
     { type: 'product', id: 3, badge: 4 },
     { type: 'product', id: 4, badge: 5 },
     { type: 'product', id: 5, badge: 6 },
-    { type: 'banner', variant: 'discover' },
+    { type: 'banner', variant: 'discover' }, // البانر الثاني (اكتشف المزيد)
     { type: 'product', id: 6, badge: 7 }
   ];
 
+  // مصفوفة لتخزين الصور (Object URLs) لتجنب التسريب
   let productImages = new Array(7).fill(null);
   let logoURL = null;
   let qrURL = null;
 
+  // دالة لتحرير الذاكرة (Object URLs)
   function revokeImage(url) {
     if (url && url.startsWith('blob:')) {
       URL.revokeObjectURL(url);
     }
   }
 
+  // دالة لحفظ البيانات في LocalStorage
   function saveToLocalStorage() {
+    // لا يمكن حفظ Object URLs، نحتاج لحفظ البيانات الخام (Base64)
+    // لهذا سنقوم بتحويل الصور الحالية إلى Base64 عند الحفظ
+    // ولكن لتجنب التعقيد سنقوم بجمع الـ Base64 من عناصر img مباشرة
     const productData = [];
     for (let i = 0; i < 7; i++) {
       const img = document.getElementById(`img-${i}`);
@@ -606,13 +422,15 @@
     localStorage.setItem('catalogData', JSON.stringify(data));
   }
 
+  // دالة لتحميل البيانات من LocalStorage
   function loadFromLocalStorage() {
     const saved = localStorage.getItem('catalogData');
     if (!saved) return;
     try {
       const data = JSON.parse(saved);
+      // تحميل المنتجات
       for (let i = 0; i < 7 && i < data.products.length; i++) {
-        if (data.products[i] && data.products[i] !== '') {
+        if (data.products[i]) {
           const img = document.getElementById(`img-${i}`);
           if (img) {
             img.src = data.products[i];
@@ -625,29 +443,30 @@
           }
         }
       }
-      if (data.logo && data.logo !== '') {
+      // تحميل اللوجو
+      if (data.logo) {
         const logoImg = document.getElementById('logoImg');
         logoImg.src = data.logo;
         logoImg.style.display = 'block';
-        const placeholder = document.getElementById('logoBox').querySelector('.placeholder');
-        if (placeholder) placeholder.style.display = 'none';
+        document.getElementById('logoBox').querySelector('.placeholder').style.display = 'none';
       }
-      if (data.qr && data.qr !== '') {
+      // تحميل QR
+      if (data.qr) {
         const qrImg = document.getElementById('qrImg');
         qrImg.src = data.qr;
         qrImg.style.display = 'block';
-        const placeholder = document.getElementById('qrBox').querySelector('.placeholder');
-        if (placeholder) placeholder.style.display = 'none';
+        document.getElementById('qrBox').querySelector('.placeholder').style.display = 'none';
       }
+      // تحميل الرابط
       if (data.link) {
         document.getElementById('catalogLink').value = data.link;
       }
     } catch(e) { console.error("Error loading data", e); }
   }
 
+  // دالة لإنشاء واجهة المستخدم بناءً على الـ gridStructure
   function renderGrid() {
     const container = document.getElementById('productsGrid');
-    if (!container) return;
     container.innerHTML = '';
     gridStructure.forEach(item => {
       if (item.type === 'product') {
@@ -676,9 +495,9 @@
           banner.innerHTML = `
             <div style="font-size:14px; font-weight:700; color:var(--gold-light);">اكتشف المزيد</div>
             <div style="font-size:12px; color:rgba(255,255,255,0.8); margin-top:2px;">Discover More</div>
-            <div style="margin-top:8px; background:white; border-radius:20px; padding:4px 10px; display:flex; align-items:center; gap:6px; width:100%; justify-content:center;">
-              <span style="font-size:16px;">💬</span>
-              <span style="font-size:10px; color:#1a4a2e; font-weight:600;">واتساب / WhatsApp</span>
+            <div style="margin-top:10px; background:white; border-radius:20px; padding:6px 14px; display:flex; align-items:center; gap:8px; width:100%; justify-content:center;">
+              <span style="font-size:18px;">💬</span>
+              <span style="font-size:11px; color:#1a4a2e; font-weight:600;">واتساب / WhatsApp</span>
             </div>
           `;
         }
@@ -687,10 +506,12 @@
     });
   }
 
+  // --- دوال تحميل الصور (محسنة باستخدام ObjectURL)
   function loadProduct(event, index) {
     const file = event.target.files[0];
     if (!file) return;
     
+    // إلغاء الـ URL القديم إن وجد
     if (productImages[index]) revokeImage(productImages[index]);
     
     const url = URL.createObjectURL(file);
@@ -698,14 +519,10 @@
     
     const img = document.getElementById(`img-${index}`);
     const card = document.getElementById(`card-${index}`);
-    if (img && card) {
-      img.src = url;
-      img.style.display = 'block';
-      const placeholder = card.querySelector('.add-placeholder');
-      const removeBtn = card.querySelector('.remove-btn');
-      if (placeholder) placeholder.style.display = 'none';
-      if (removeBtn) removeBtn.style.display = 'flex';
-    }
+    img.src = url;
+    img.style.display = 'block';
+    card.querySelector('.add-placeholder').style.display = 'none';
+    card.querySelector('.remove-btn').style.display = 'flex';
     
     saveToLocalStorage();
   }
@@ -717,18 +534,13 @@
       revokeImage(productImages[index]);
       productImages[index] = null;
     }
-    if (img) {
-      img.src = '';
-      img.style.display = 'none';
-    }
-    if (card) {
-      const placeholder = card.querySelector('.add-placeholder');
-      const removeBtn = card.querySelector('.remove-btn');
-      if (placeholder) placeholder.style.display = 'flex';
-      if (removeBtn) removeBtn.style.display = 'none';
-      const input = card.querySelector('input[type="file"]');
-      if (input) input.value = '';
-    }
+    img.src = '';
+    img.style.display = 'none';
+    card.querySelector('.add-placeholder').style.display = 'flex';
+    card.querySelector('.remove-btn').style.display = 'none';
+    // Reset file input
+    const input = card.querySelector('input[type="file"]');
+    if (input) input.value = '';
     saveToLocalStorage();
   }
 
@@ -739,36 +551,34 @@
     const img = document.getElementById(imgId);
     const box = document.getElementById(boxId);
     
+    // حفظ الـ URL السابق وتحريره
     if (imgId === 'logoImg' && logoURL) revokeImage(logoURL);
     if (imgId === 'qrImg' && qrURL) revokeImage(qrURL);
     if (imgId === 'logoImg') logoURL = url;
     if (imgId === 'qrImg') qrURL = url;
     
-    if (img) {
-      img.src = url;
-      img.style.display = 'block';
-    }
-    if (box) {
-      const placeholder = box.querySelector('.placeholder');
-      if (placeholder) placeholder.style.display = 'none';
-    }
+    img.src = url;
+    img.style.display = 'block';
+    box.querySelector('.placeholder').style.display = 'none';
     saveToLocalStorage();
   }
 
+  // --- ربط الأحداث وإعداد الصفحة ---
   window.onload = () => {
-    renderGrid();
+    renderGrid(); // بناء واجهة المنتجات والبانرات
     
-    const logoInput = document.getElementById('logoInput');
-    const qrInput = document.getElementById('qrInput');
-    const catalogLink = document.getElementById('catalogLink');
+    // ربط أحداث الإدخالات التي تم إنشاؤها ديناميكياً
+    document.getElementById('logoInput').addEventListener('change', (e) => loadLogoOrQR(e, 'logoImg', 'logoBox'));
+    document.getElementById('qrInput').addEventListener('change', (e) => loadLogoOrQR(e, 'qrImg', 'qrBox'));
     
-    if (logoInput) logoInput.addEventListener('change', (e) => loadLogoOrQR(e, 'logoImg', 'logoBox'));
-    if (qrInput) qrInput.addEventListener('change', (e) => loadLogoOrQR(e, 'qrImg', 'qrBox'));
-    if (catalogLink) catalogLink.addEventListener('input', saveToLocalStorage);
+    // ربط الحفظ عند تغيير الرابط
+    document.getElementById('catalogLink').addEventListener('input', saveToLocalStorage);
     
+    // تحميل البيانات المحفوظة
     loadFromLocalStorage();
   };
   
+  // جعل الدوال عامة للاستخدام في الـ HTML
   window.loadProduct = loadProduct;
   window.removeImage = removeImage;
 </script>
