@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حاسبة المطهرات</title>
+<meta name="theme-color" content="#0B6E4F">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-page-title-i18n="sanitizer.pageTitle">
+<a class="skip-link" href="#main-content">تخطي إلى المحتوى / Skip to content</a>
+<div id="app-header"></div>
+
+<main id="main-content">
+  <h1 data-i18n="sanitizer.pageTitle"></h1>
+  <p data-i18n="sanitizer.pageDesc"></p>
+
+  <div class="alert alert-danger no-print" role="alert">
+    <span data-i18n="sanitizer.safety.neverMix"></span>
+  </div>
+
+  <div class="tabs no-print" role="tablist" aria-label="sanitizer tabs">
+    <button class="tab-btn active" data-tab="recipe" role="tab" aria-selected="true" data-i18n="sanitizer.tabs.recipe"></button>
+    <button class="tab-btn" data-tab="check" role="tab" aria-selected="false" data-i18n="sanitizer.tabs.check"></button>
+    <button class="tab-btn" data-tab="reference" role="tab" aria-selected="false" data-i18n="sanitizer.tabs.reference"></button>
+    <button class="tab-btn" data-tab="log" role="tab" aria-selected="false" data-i18n="sanitizer.tabs.log"></button>
+  </div>
+
+  <!-- ================= TAB A: RECIPE ================= -->
+  <section class="tab-panel active" id="panel-recipe">
+    <div class="card">
+      <div class="field">
+        <label for="r-type" data-i18n="sanitizer.sanitizerType"></label>
+        <select id="r-type"></select>
+      </div>
+
+      <div class="field" id="r-use-field">
+        <label for="r-use" data-i18n="sanitizer.checkUseSelect"></label>
+        <select id="r-use"></select>
+      </div>
+
+      <div class="field">
+        <label data-i18n="sanitizer.productConcType"></label>
+        <div class="radio-group" id="r-conc-type-group"></div>
+      </div>
+
+      <div class="field" id="r-preset-field" hidden>
+        <label for="r-preset" data-i18n="sanitizer.presetLabel"></label>
+        <select id="r-preset"></select>
+      </div>
+
+      <div class="field">
+        <label for="r-conc-value" id="r-conc-value-label"></label>
+        <input type="number" id="r-conc-value" min="0" step="0.01" inputmode="decimal">
+        <div class="field-error" id="r-conc-value-error"></div>
+      </div>
+
+      <div class="field">
+        <label for="r-target" id="r-target-label"></label>
+        <input type="number" id="r-target" min="0" step="0.01" inputmode="decimal">
+        <div class="field-error" id="r-target-error"></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="r-volume" data-i18n="sanitizer.finalVolume"></label>
+          <input type="number" id="r-volume" min="0" step="0.01" inputmode="decimal">
+          <div class="field-error" id="r-volume-error"></div>
+        </div>
+        <div class="field">
+          <label for="r-volume-unit" data-i18n="sanitizer.volumeUnit"></label>
+          <select id="r-volume-unit">
+            <option value="L" data-i18n="sanitizer.liters"></option>
+            <option value="gal" data-i18n="sanitizer.gallons"></option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-block" id="r-calc-btn" data-i18n="common.calculate"></button>
+
+      <div id="r-result" hidden></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB B: CHECK ================= -->
+  <section class="tab-panel" id="panel-check">
+    <div class="card">
+      <div class="field">
+        <label for="c-type" data-i18n="sanitizer.sanitizerType"></label>
+        <select id="c-type"></select>
+      </div>
+
+      <div class="field">
+        <label for="c-use" data-i18n="sanitizer.checkUseSelect"></label>
+        <select id="c-use"></select>
+      </div>
+
+      <div class="field">
+        <label data-i18n="sanitizer.productConcType"></label>
+        <div class="radio-group" id="c-conc-type-group"></div>
+      </div>
+
+      <div class="field">
+        <label for="c-conc-value" id="c-conc-value-label"></label>
+        <input type="number" id="c-conc-value" min="0" step="0.01" inputmode="decimal">
+        <div class="field-error" id="c-conc-value-error"></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="c-added" id="c-added-label"></label>
+          <input type="number" id="c-added" min="0" step="0.01" inputmode="decimal">
+          <div class="field-error" id="c-added-error"></div>
+        </div>
+        <div class="field">
+          <label for="c-water" id="c-water-label"></label>
+          <input type="number" id="c-water" min="0" step="0.01" inputmode="decimal">
+          <div class="field-error" id="c-water-error"></div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-block" id="c-calc-btn" data-i18n="common.calculate"></button>
+
+      <div id="c-result" hidden></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB C: REFERENCE ================= -->
+  <section class="tab-panel" id="panel-reference">
+    <div class="card">
+      <h2 data-i18n="sanitizer.referenceTitle"></h2>
+      <p class="tool-desc" data-i18n="sanitizer.referenceNote"></p>
+      <div class="table-wrap">
+        <table id="ref-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem;" id="ppe-card"></div>
+  </section>
+
+  <!-- ================= TAB D: LOG ================= -->
+  <section class="tab-panel" id="panel-log">
+    <div class="card">
+      <h2 data-i18n="sanitizer.logTitle"></h2>
+      <div class="log-actions no-print">
+        <button type="button" class="btn btn-ghost btn-sm" id="log-export-btn" data-i18n="common.exportCsv"></button>
+        <button type="button" class="btn btn-ghost btn-sm" id="log-print-btn" data-i18n="common.print"></button>
+        <button type="button" class="btn btn-danger btn-sm" id="log-clear-btn" data-i18n="common.clearAll"></button>
+      </div>
+      <div class="table-wrap">
+        <table id="log-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="log-empty" data-i18n="sanitizer.logEmpty" hidden></p>
+    </div>
+  </section>
+
+  <!-- ================= PRINT RECORD AREA ================= -->
+  <div class="print-only" id="printArea"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="../assets/i18n.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+  // -------------------- بيانات المطهرات الخبيرة (مرجع Codex / FDA Food Code شائع) --------------------
+  // كل التراكيز بوحدة ppm الداخلية، إلا كحول: مخزّن كنسبة مئوية (nativeUnit: 'percent') وتُحوَّل داخلياً ×10000
+  const SANITIZER_TYPES = ["chlorine", "quat", "paa", "alcohol", "iodine"];
+
+  const REFERENCE_DATA = {
+    chlorine: {
+      nativeUnit: "ppm",
+      ranges: {
+        foodContact: { min: 100, max: 200, contact: { ar: "≥ دقيقة واحدة", en: "≥ 1 minute" }, rinse: false },
+        produce:     { min: 50,  max: 100, contact: { ar: "1–2 دقيقة", en: "1–2 minutes" }, rinse: true },
+        floors:      { min: 400, max: 800, contact: { ar: "5–10 دقائق", en: "5–10 minutes" }, rinse: false }
+      }
+    },
+    quat: {
+      nativeUnit: "ppm",
+      ranges: {
+        foodContact: { min: 150, max: 400, contact: { ar: "≥ دقيقة واحدة", en: "≥ 1 minute" }, rinse: false },
+        produce:     { notRecommended: true },
+        floors:      { min: 400, max: 800, contact: { ar: "5–10 دقائق", en: "5–10 minutes" }, rinse: false }
+      }
+    },
+    paa: {
+      nativeUnit: "ppm",
+      ranges: {
+        foodContact: { min: 100, max: 200, contact: { ar: "≥ دقيقة واحدة", en: "≥ 1 minute" }, rinse: false },
+        produce:     { min: 30,  max: 80,  contact: { ar: "1–2 دقيقة", en: "1–2 minutes" }, rinse: false },
+        floors:      { min: 200, max: 400, contact: { ar: "5–10 دقائق", en: "5–10 minutes" }, rinse: false }
+      }
+    },
+    alcohol: {
+      nativeUnit: "percent",
+      ranges: {
+        foodContact: { min: 60, max: 70, contact: { ar: "≥ 30 ثانية (يجب أن يبقى مبللاً)", en: "≥ 30 seconds (must remain wet)" }, rinse: false },
+        produce:     { notRecommended: true },
+        floors:      { notRecommended: true }
+      }
+    },
+    iodine: {
+      nativeUnit: "ppm",
+      ranges: {
+        foodContact: { min: 12.5, max: 25, contact: { ar: "≥ دقيقة واحدة", en: "≥ 1 minute" }, rinse: false },
+        produce:     { min: 12.5, max: 25, contact: { ar: "1–2 دقيقة", en: "1–2 minutes" }, rinse: true },
+        floors:      { notRecommended: true }
+      }
+    }
+  };
+
+  const USES = ["foodContact", "produce", "floors"];
+
+  // -------------------- أدوات تحويل الوحدات --------------------
+  function toPpm(value, unit) {
+    return unit === "percent" ? value * 10000 : value;
+  }
+
+  function nativeToPpm(value, type) {
+    return REFERENCE_DATA[type].nativeUnit === "percent" ? value * 10000 : value;
+  }
+
+  function formatConcentration(ppmValue, type) {
+    if (REFERENCE_DATA[type].nativeUnit === "percent") {
+      return (ppmValue / 10000).toFixed(2) + "%";
+    }
+    return Math.round(ppmValue * 10) / 10 + " ppm";
+  }
+
+  function litersFromVolume(value, unit) {
+    return unit === "gal" ? value * 3.78541 : value;
+  }
+
+  // -------------------- تعبئة القوائم المنسدلة --------------------
+  function fillTypeSelect(select) {
+    select.innerHTML = SANITIZER_TYPES.map((type) => `<option value="${type}">${t("sanitizer.types." + type)}</option>`).join("");
+  }
+
+  function fillUseSelect(select) {
+    select.innerHTML = USES.map((use) => `<option value="${use}">${t("sanitizer.uses." + use)}</option>`).join("");
+  }
+
+  function fillConcTypeRadios(container, name) {
+    container.innerHTML = `
+      <label class="radio-chip"><input type="radio" name="${name}" value="percent" checked> <span data-i18n="sanitizer.byPercent"></span></label>
+      <label class="radio-chip"><input type="radio" name="${name}" value="ppm"> <span data-i18n="sanitizer.byPpm"></span></label>
+    `;
+    applyI18n(container);
+  }
+
+  function getCheckedRadio(container, name) {
+    const checked = container.querySelector(`input[name="${name}"]:checked`);
+    return checked ? checked.value : "percent";
+  }
+
+  function updateRadioChipStyles(container, name) {
+    container.querySelectorAll(".radio-chip").forEach((chip) => {
+      const input = chip.querySelector("input");
+      chip.classList.toggle("checked", input.checked);
+    });
+    container.querySelectorAll(`input[name="${name}"]`).forEach((input) => {
+      input.addEventListener("change", () => updateRadioChipStyles(container, name));
+    });
+  }
+
+  // -------------------- التبويبات --------------------
+  function setupTabs() {
+    const buttons = document.querySelectorAll(".tab-btn");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+        if (btn.dataset.tab === "reference") renderReferenceTable();
+        if (btn.dataset.tab === "log") renderLog();
+      });
+    });
+  }
+
+  // -------------------- عرض حقل التركيز حسب النوع (ppm أو %) --------------------
+  function updateConcValueLabel(prefix) {
+    const type = document.getElementById(prefix + "-type").value;
+    const concTypeGroup = document.getElementById(prefix + "-conc-type-group");
+    const concType = getCheckedRadio(concTypeGroup, prefix + "-conc-type");
+    const label = document.getElementById(prefix + "-conc-value-label");
+    label.textContent = t("sanitizer.productConcValue") + " (" + (concType === "percent" ? "%" : "ppm") + ")";
+  }
+
+  // -------------------- Presets (كلور فقط) --------------------
+  function updatePresetVisibility() {
+    const type = document.getElementById("r-type").value;
+    const concTypeGroup = document.getElementById("r-conc-type-group");
+    const concType = getCheckedRadio(concTypeGroup, "r-conc-type");
+    const presetField = document.getElementById("r-preset-field");
+    const show = type === "chlorine" && concType === "percent";
+    presetField.hidden = !show;
+    if (show) {
+      const presetSelect = document.getElementById("r-preset");
+      presetSelect.innerHTML = `
+        <option value="custom">${t("sanitizer.presetCustom")}</option>
+        <option value="5">${t("sanitizer.presetHousehold5")}</option>
+        <option value="10">${t("sanitizer.presetCommercial10")}</option>
+        <option value="12">${t("sanitizer.presetCommercial12")}</option>
+      `;
+    }
+  }
+
+  function wirePresetSelect() {
+    document.getElementById("r-preset").addEventListener("change", (e) => {
+      if (e.target.value !== "custom") {
+        document.getElementById("r-conc-value").value = e.target.value;
+      }
+    });
+  }
+
+  // -------------------- التحقق من الحقول --------------------
+  function showFieldError(inputId, errorId, error) {
+    const field = document.getElementById(inputId).closest(".field");
+    const errorEl = document.getElementById(errorId);
+    if (error) {
+      field.classList.add("has-error");
+      errorEl.textContent = error;
+    } else {
+      field.classList.remove("has-error");
+      errorEl.textContent = "";
+    }
+  }
+
+  // -------------------- منطقة التحذيرات / PPE --------------------
+  function renderPpeNote(type) {
+    return `<p><strong data-i18n="sanitizer.safety.ppeTitle"></strong><br>${t("sanitizer.safety.ppe." + type)}</p>`;
+  }
+
+  // -------------------- TAB A: حساب الوصفة --------------------
+  function calcRecipe() {
+    const type = document.getElementById("r-type").value;
+    const use = document.getElementById("r-use").value;
+    const concType = getCheckedRadio(document.getElementById("r-conc-type-group"), "r-conc-type");
+    const concValueRaw = document.getElementById("r-conc-value").value;
+    const targetRaw = document.getElementById("r-target").value;
+    const volumeRaw = document.getElementById("r-volume").value;
+    const volumeUnit = document.getElementById("r-volume-unit").value;
+
+    let valid = true;
+
+    const concCheck = parseNumberField(concValueRaw, { positive: true, max: concType === "percent" ? 100 : 1000000 });
+    if (!concCheck.ok) { showFieldError("r-conc-value", "r-conc-value-error", concCheck.error); valid = false; }
+    else showFieldError("r-conc-value", "r-conc-value-error", null);
+
+    const targetCheck = parseNumberField(targetRaw, { positive: true, max: type === "alcohol" ? 100 : 1000000 });
+    if (!targetCheck.ok) { showFieldError("r-target", "r-target-error", targetCheck.error); valid = false; }
+    else showFieldError("r-target", "r-target-error", null);
+
+    const volumeCheck = parseNumberField(volumeRaw, { positive: true, max: 100000 });
+    if (!volumeCheck.ok) { showFieldError("r-volume", "r-volume-error", volumeCheck.error); valid = false; }
+    else showFieldError("r-volume", "r-volume-error", null);
+
+    if (!valid) { document.getElementById("r-result").hidden = true; return; }
+
+    const c1Ppm = toPpm(concCheck.value, concType);
+    const targetUnit = type === "alcohol" ? "percent" : "ppm";
+    const c2Ppm = toPpm(targetCheck.value, targetUnit);
+
+    if (c2Ppm >= c1Ppm) {
+      showFieldError("r-target", "r-target-error", t("sanitizer.validation.targetExceedsProduct"));
+      document.getElementById("r-result").hidden = true;
+      return;
+    }
+
+    const v2L = litersFromVolume(volumeCheck.value, volumeUnit);
+    const v1L = (c2Ppm * v2L) / c1Ppm;
+    const waterL = v2L - v1L;
+    const sanitizerMl = v1L * 1000;
+
+    const waterDisplay = volumeUnit === "gal" ? (waterL / 3.78541) : waterL;
+    const volDisplay = volumeCheck.value;
+    const volUnitLabel = volumeUnit === "gal" ? t("sanitizer.gallons") : t("sanitizer.liters");
+
+    const verdict = evaluateVerdict(c2Ppm, type, use);
+
+    renderRecipeResult({
+      type, use, concCheck, c2Ppm, sanitizerMl, waterDisplay, volDisplay, volUnitLabel, verdict, c1Ppm
+    });
+
+    window._lastRecipeRecord = {
+      id: uid(),
+      dateTime: formatDateTime(),
+      source: "recipe",
+      type,
+      use,
+      ppm: c2Ppm,
+      volume: volDisplay + " " + volUnitLabel,
+      status: verdict.status
+    };
+  }
+
+  function evaluateVerdict(resultPpm, type, use) {
+    const range = REFERENCE_DATA[type].ranges[use];
+    if (!range || range.notRecommended) {
+      return { status: "warning", text: t("sanitizer.notRecommended"), range: null };
+    }
+    const minPpm = nativeToPpm(range.min, type);
+    const maxPpm = nativeToPpm(range.max, type);
+    if (resultPpm < minPpm) return { status: "warning", text: t("sanitizer.checkVerdictLow"), range };
+    if (resultPpm > maxPpm) return { status: "danger", text: t("sanitizer.checkVerdictHigh"), range };
+    return { status: "ok", text: t("sanitizer.checkVerdictOk"), range };
+  }
+
+  function renderRecipeResult(data) {
+    const { type, use, c2Ppm, sanitizerMl, waterDisplay, volDisplay, volUnitLabel, verdict } = data;
+    const box = document.getElementById("r-result");
+    box.hidden = false;
+    box.className = verdict.status === "ok" ? "result-box" : (verdict.status === "warning" ? "result-box warning" : "result-box danger");
+
+    const sentence = t("sanitizer.recipeSentence")
+      .replace("{amount}", `<strong>${sanitizerMl.toFixed(1)} mL</strong>`)
+      .replace("{sanitizer}", `<strong>${t("sanitizer.types." + type)}</strong>`)
+      .replace("{water}", `<strong>${waterDisplay.toFixed(2)} ${volUnitLabel}</strong>`)
+      .replace("{volume}", `${volDisplay} ${volUnitLabel}`)
+      .replace("{ppm}", formatConcentration(c2Ppm, type));
+
+    const outOfRangeBadge = verdict.status !== "ok"
+      ? `<p><strong>${verdict.text}</strong>${verdict.status === "danger" || verdict.status === "warning" ? " — " + t("sanitizer.outOfRecommended") : ""}</p>`
+      : `<p><strong>${verdict.text}</strong></p>`;
+
+    box.innerHTML = `
+      <p class="result-sentence">${sentence}</p>
+      <div class="result-figures">
+        <div class="result-figure"><div class="value">${sanitizerMl.toFixed(1)}</div><div class="label">mL</div></div>
+        <div class="result-figure"><div class="value">${waterDisplay.toFixed(2)}</div><div class="label">${volUnitLabel}</div></div>
+        <div class="result-figure"><div class="value">${formatConcentration(c2Ppm, type)}</div><div class="label" data-i18n="sanitizer.targetPpm"></div></div>
+      </div>
+      ${outOfRangeBadge}
+      <details class="how-calc">
+        <summary data-i18n="sanitizer.howCalcTitle"></summary>
+        <div class="calc-body">${t("sanitizer.howCalcBody")}</div>
+      </details>
+      ${renderPpeNote(type)}
+      <div class="no-print" style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1rem;">
+        <button type="button" class="btn btn-secondary btn-sm" id="r-save-btn" data-i18n="common.saveAsRecord"></button>
+        <button type="button" class="btn btn-ghost btn-sm" id="r-print-btn" data-i18n="common.printRecord"></button>
+      </div>
+    `;
+    applyI18n(box);
+
+    document.getElementById("r-save-btn").addEventListener("click", () => {
+      saveLogEntry(window._lastRecipeRecord);
+    });
+    document.getElementById("r-print-btn").addEventListener("click", () => {
+      printRecordSheet({
+        titleKey: "sanitizer.pageTitle",
+        note: t("sanitizer.safety.neverMix"),
+        rows: [
+          [t("sanitizer.sanitizerType"), t("sanitizer.types." + type)],
+          [t("sanitizer.checkUseSelect"), t("sanitizer.uses." + use)],
+          [t("sanitizer.targetPpm"), formatConcentration(c2Ppm, type)],
+          [t("sanitizer.sanitizerAmount"), sanitizerMl.toFixed(1) + " mL"],
+          [t("sanitizer.waterAmount"), waterDisplay.toFixed(2) + " " + volUnitLabel],
+          [verdict.text, ""]
+        ]
+      });
+    });
+  }
+
+  // -------------------- TAB B: فحص محلول جاهز --------------------
+  function calcCheck() {
+    const type = document.getElementById("c-type").value;
+    const use = document.getElementById("c-use").value;
+    const concType = getCheckedRadio(document.getElementById("c-conc-type-group"), "c-conc-type");
+    const concValueRaw = document.getElementById("c-conc-value").value;
+    const addedRaw = document.getElementById("c-added").value;
+    const waterRaw = document.getElementById("c-water").value;
+
+    let valid = true;
+    const concCheck = parseNumberField(concValueRaw, { positive: true, max: concType === "percent" ? 100 : 1000000 });
+    if (!concCheck.ok) { showFieldError("c-conc-value", "c-conc-value-error", concCheck.error); valid = false; }
+    else showFieldError("c-conc-value", "c-conc-value-error", null);
+
+    const addedCheck = parseNumberField(addedRaw, { positive: true, max: 1000000 });
+    if (!addedCheck.ok) { showFieldError("c-added", "c-added-error", addedCheck.error); valid = false; }
+    else showFieldError("c-added", "c-added-error", null);
+
+    const waterCheck = parseNumberField(waterRaw, { positive: true, max: 1000000 });
+    if (!waterCheck.ok) { showFieldError("c-water", "c-water-error", waterCheck.error); valid = false; }
+    else showFieldError("c-water", "c-water-error", null);
+
+    if (!valid) { document.getElementById("c-result").hidden = true; return; }
+
+    const c1Ppm = toPpm(concCheck.value, concType);
+    const totalVolume = addedCheck.value + waterCheck.value;
+    const resultPpm = (c1Ppm * addedCheck.value) / totalVolume;
+    const verdict = evaluateVerdict(resultPpm, type, use);
+
+    const box = document.getElementById("c-result");
+    box.hidden = false;
+    box.className = verdict.status === "ok" ? "result-box" : (verdict.status === "warning" ? "result-box warning" : "result-box danger");
+    box.innerHTML = `
+      <p class="result-sentence">${verdict.text}</p>
+      <div class="result-figures">
+        <div class="result-figure"><div class="value">${formatConcentration(resultPpm, type)}</div><div class="label" data-i18n="sanitizer.checkResultPpm"></div></div>
+      </div>
+      ${renderPpeNote(type)}
+      <div class="no-print" style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1rem;">
+        <button type="button" class="btn btn-secondary btn-sm" id="c-save-btn" data-i18n="common.saveAsRecord"></button>
+        <button type="button" class="btn btn-ghost btn-sm" id="c-print-btn" data-i18n="common.printRecord"></button>
+      </div>
+    `;
+    applyI18n(box);
+
+    const record = {
+      id: uid(),
+      dateTime: formatDateTime(),
+      source: "check",
+      type,
+      use,
+      ppm: resultPpm,
+      volume: (addedCheck.value + waterCheck.value).toFixed(1),
+      status: verdict.status
+    };
+
+    document.getElementById("c-save-btn").addEventListener("click", () => saveLogEntry(record));
+    document.getElementById("c-print-btn").addEventListener("click", () => {
+      printRecordSheet({
+        titleKey: "sanitizer.pageTitle",
+        note: t("sanitizer.safety.neverMix"),
+        rows: [
+          [t("sanitizer.sanitizerType"), t("sanitizer.types." + type)],
+          [t("sanitizer.checkUseSelect"), t("sanitizer.uses." + use)],
+          [t("sanitizer.checkAddedVolume"), addedCheck.value],
+          [t("sanitizer.checkWaterVolume"), waterCheck.value],
+          [t("sanitizer.checkResultPpm"), formatConcentration(resultPpm, type)],
+          [verdict.text, ""]
+        ]
+      });
+    });
+  }
+
+  // -------------------- TAB C: الجدول المرجعي --------------------
+  function renderReferenceTable() {
+    const table = document.getElementById("ref-table");
+    const thead = table.querySelector("thead");
+    const tbody = table.querySelector("tbody");
+    const lang = getLang();
+
+    thead.innerHTML = `<tr>
+      <th data-i18n="sanitizer.table.use"></th>
+      ${SANITIZER_TYPES.map((type) => `<th>${t("sanitizer.types." + type)}</th>`).join("")}
+    </tr>`;
+
+    tbody.innerHTML = USES.map((use) => {
+      const cells = SANITIZER_TYPES.map((type) => {
+        const range = REFERENCE_DATA[type].ranges[use];
+        if (!range || range.notRecommended) {
+          return `<td>${t("sanitizer.notRecommended")}</td>`;
+        }
+        const unit = REFERENCE_DATA[type].nativeUnit === "percent" ? "%" : "ppm";
+        const rinseLabel = range.rinse ? t("sanitizer.yes") : t("sanitizer.no");
+        return `<td><strong>${range.min}–${range.max} ${unit}</strong><br><span class="ref-note">${t("sanitizer.table.contactTime")}: ${range.contact[lang]}</span><br><span class="ref-note">${t("sanitizer.table.rinse")}: ${rinseLabel}</span></td>`;
+      }).join("");
+      return `<tr><td><strong>${t("sanitizer.uses." + use)}</strong></td>${cells}</tr>`;
+    }).join("");
+
+    applyI18n(thead);
+
+    const ppeCard = document.getElementById("ppe-card");
+    ppeCard.innerHTML = `<h2 data-i18n="sanitizer.safety.title"></h2>` +
+      SANITIZER_TYPES.map((type) => `<p><strong>${t("sanitizer.types." + type)}:</strong> ${t("sanitizer.safety.ppe." + type)}</p>`).join("");
+    applyI18n(ppeCard);
+  }
+
+  // -------------------- TAB D: السجل --------------------
+  function saveLogEntry(record) {
+    const log = loadJSON(STORAGE_KEYS.sanitizerLog, []);
+    log.unshift(record);
+    saveJSON(STORAGE_KEYS.sanitizerLog, log);
+    renderLog();
+  }
+
+  function renderLog() {
+    const log = loadJSON(STORAGE_KEYS.sanitizerLog, []);
+    const table = document.getElementById("log-table");
+    const thead = table.querySelector("thead");
+    const tbody = table.querySelector("tbody");
+    const emptyMsg = document.getElementById("log-empty");
+
+    thead.innerHTML = `<tr>
+      <th data-i18n="sanitizer.logCols.dateTime"></th>
+      <th data-i18n="sanitizer.logCols.type"></th>
+      <th data-i18n="sanitizer.checkUseSelect"></th>
+      <th data-i18n="sanitizer.logCols.ppm"></th>
+      <th data-i18n="sanitizer.logCols.volume"></th>
+      <th data-i18n="sanitizer.logCols.status"></th>
+      <th class="no-print"></th>
+    </tr>`;
+    applyI18n(thead);
+
+    emptyMsg.hidden = log.length > 0;
+    table.hidden = log.length === 0;
+
+    tbody.innerHTML = log.map((entry) => `
+      <tr>
+        <td>${entry.dateTime}</td>
+        <td>${t("sanitizer.types." + entry.type)}</td>
+        <td>${t("sanitizer.uses." + entry.use)}</td>
+        <td>${formatConcentration(entry.ppm, entry.type)}</td>
+        <td>${entry.volume}</td>
+        <td><span class="status-pill status-${entry.status}">${entry.status === "ok" ? t("sanitizer.checkVerdictOk") : (entry.status === "warning" ? t("sanitizer.checkVerdictLow") : t("sanitizer.checkVerdictHigh"))}</span></td>
+        <td class="no-print"><button type="button" class="btn btn-icon" data-delete="${entry.id}" aria-label="delete">🗑️</button></td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll("[data-delete]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (!confirm(t("common.confirmDelete"))) return;
+        const id = btn.getAttribute("data-delete");
+        const newLog = loadJSON(STORAGE_KEYS.sanitizerLog, []).filter((e) => e.id !== id);
+        saveJSON(STORAGE_KEYS.sanitizerLog, newLog);
+        renderLog();
+      });
+    });
+  }
+
+  function wireLogActions() {
+    document.getElementById("log-clear-btn").addEventListener("click", () => {
+      if (!confirm(t("common.confirmClearAll"))) return;
+      saveJSON(STORAGE_KEYS.sanitizerLog, []);
+      renderLog();
+    });
+    document.getElementById("log-export-btn").addEventListener("click", () => {
+      const log = loadJSON(STORAGE_KEYS.sanitizerLog, []);
+      const headers = [t("sanitizer.logCols.dateTime"), t("sanitizer.logCols.type"), t("sanitizer.checkUseSelect"), t("sanitizer.logCols.ppm"), t("sanitizer.logCols.volume"), t("sanitizer.logCols.status")];
+      const rows = log.map((e) => [e.dateTime, t("sanitizer.types." + e.type), t("sanitizer.uses." + e.use), formatConcentration(e.ppm, e.type), e.volume, e.status]);
+      downloadCsv("sanitizer-log.csv", headers, rows);
+    });
+    document.getElementById("log-print-btn").addEventListener("click", () => window.print());
+  }
+
+  // -------------------- التهيئة --------------------
+  function populateForm(prefix) {
+    fillTypeSelect(document.getElementById(prefix + "-type"));
+    fillUseSelect(document.getElementById(prefix + "-use"));
+    fillConcTypeRadios(document.getElementById(prefix + "-conc-type-group"), prefix + "-conc-type");
+    updateRadioChipStyles(document.getElementById(prefix + "-conc-type-group"), prefix + "-conc-type");
+    updateConcValueLabel(prefix);
+  }
+
+  function renderAll() {
+    populateForm("r");
+    populateForm("c");
+    updatePresetVisibility();
+
+    document.getElementById("r-target-label").textContent =
+      t("sanitizer.targetPpm");
+    document.getElementById("c-added-label").textContent = t("sanitizer.checkAddedVolume") + " (mL)";
+    document.getElementById("c-water-label").textContent = t("sanitizer.checkWaterVolume") + " (mL)";
+
+    if (document.getElementById("panel-reference").classList.contains("active")) renderReferenceTable();
+    if (document.getElementById("panel-log").classList.contains("active")) renderLog();
+
+    // إعادة تشغيل النتائج المعروضة حالياً بلغة جديدة (إن وجدت) عبر إعادة الحساب
+    if (!document.getElementById("r-result").hidden) calcRecipe();
+    if (!document.getElementById("c-result").hidden) calcCheck();
+  }
+
+  function init() {
+    initApp({ basePath: "../", activeToolId: "sanitizer" });
+    setupTabs();
+    renderAll();
+    wirePresetSelect();
+    wireLogActions();
+    renderLog();
+
+    ["r-type", "r-conc-type-group"].forEach((id) => {});
+    document.getElementById("r-type").addEventListener("change", () => { updateConcValueLabel("r"); updatePresetVisibility(); });
+    document.getElementById("r-conc-type-group").addEventListener("change", () => { updateConcValueLabel("r"); updatePresetVisibility(); });
+    document.getElementById("c-type").addEventListener("change", () => updateConcValueLabel("c"));
+    document.getElementById("c-conc-type-group").addEventListener("change", () => updateConcValueLabel("c"));
+
+    document.getElementById("r-calc-btn").addEventListener("click", calcRecipe);
+    document.getElementById("c-calc-btn").addEventListener("click", calcCheck);
+
+    document.addEventListener("i18n:change", renderAll);
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>

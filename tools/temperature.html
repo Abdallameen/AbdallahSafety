@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دليل درجات الحرارة</title>
+<meta name="theme-color" content="#0B6E4F">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-page-title-i18n="temperature.pageTitle">
+<a class="skip-link" href="#main-content">تخطي إلى المحتوى / Skip to content</a>
+<div id="app-header"></div>
+
+<main id="main-content">
+  <h1 data-i18n="temperature.pageTitle"></h1>
+  <p data-i18n="temperature.pageDesc"></p>
+
+  <div class="alert alert-info no-print" role="note">
+    <strong data-i18n="temperature.dangerZoneTitle"></strong>
+    <span data-i18n="temperature.dangerZoneText"></span>
+  </div>
+
+  <div class="tabs no-print" role="tablist" aria-label="temperature tabs">
+    <button class="tab-btn active" data-tab="guide" role="tab" aria-selected="true" data-i18n="temperature.tabs.guide"></button>
+    <button class="tab-btn" data-tab="checker" role="tab" aria-selected="false" data-i18n="temperature.tabs.checker"></button>
+  </div>
+
+  <!-- ================= TAB A: الدليل المرجعي ================= -->
+  <section class="tab-panel active" id="panel-guide">
+    <div class="card">
+      <div class="field-row">
+        <div class="field">
+          <label for="g-search" data-i18n="common.appName" style="display:none"></label>
+          <input type="text" id="g-search" data-i18n-placeholder="temperature.searchPlaceholder">
+        </div>
+        <div class="field">
+          <select id="g-filter"></select>
+        </div>
+      </div>
+      <div class="ref-grid" id="g-grid"></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB B: فاحص القراءة ================= -->
+  <section class="tab-panel" id="panel-checker">
+    <div class="card">
+      <div class="field">
+        <label for="chk-operation" data-i18n="temperature.checkerOperation"></label>
+        <select id="chk-operation"></select>
+      </div>
+
+      <div class="field" id="chk-food-field">
+        <label for="chk-food" data-i18n="temperature.checkerFood"></label>
+        <select id="chk-food"></select>
+      </div>
+
+      <div class="field" id="chk-elapsed-field" hidden>
+        <label for="chk-elapsed" data-i18n="temperature.checkerElapsed"></label>
+        <input type="number" id="chk-elapsed" min="0" step="0.1" inputmode="decimal">
+        <div class="field-error" id="chk-elapsed-error"></div>
+      </div>
+
+      <div class="field">
+        <label for="chk-reading" data-i18n="temperature.checkerReading"></label>
+        <input type="number" id="chk-reading" step="0.1" inputmode="decimal">
+        <div class="field-error" id="chk-reading-error"></div>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-block" id="chk-calc-btn" data-i18n="common.calculate"></button>
+
+      <div id="chk-result" hidden></div>
+    </div>
+  </section>
+
+  <div class="print-only" id="printArea"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="../assets/i18n.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+  // -------------------- بيانات الدليل المرجعي (Codex / FDA Food Code — مرجع عام) --------------------
+  const GUIDE_ITEMS = [
+    { id: "poultry", cat: "cooking", name: { ar: "دواجن كاملة أو مفرومة", en: "Poultry (whole or ground)" }, temp: { ar: "74°م", en: "74°C" }, note: { ar: "يشمل الدجاج والديك الرومي والبط والدواجن المحشوة", en: "Includes chicken, turkey, duck, and stuffed poultry" } },
+    { id: "groundMeat", cat: "cooking", name: { ar: "لحم مفروم (بقري/غنم، برجر، نقانق)", en: "Ground meat (beef, lamb, burgers, sausage)" }, temp: { ar: "71°م", en: "71°C" }, note: { ar: "الفرم يعرّض سطح البكتيريا للداخل، لذا الحد أعلى من القطع الكاملة", en: "Grinding exposes surface bacteria internally, so the limit is higher than whole cuts" } },
+    { id: "wholeMeat", cat: "cooking", name: { ar: "لحوم كاملة (ستيك، روست)", en: "Whole cuts (steaks, roasts)" }, temp: { ar: "63°م + 3 دقائق راحة", en: "63°C + 3 min rest" }, note: { ar: "زمن الراحة بعد الطبخ ضروري لإتمام القضاء على الميكروبات", en: "Rest time after cooking is required to complete pathogen destruction" } },
+    { id: "fish", cat: "cooking", name: { ar: "أسماك ومأكولات بحرية", en: "Fish & seafood" }, temp: { ar: "63°م", en: "63°C" }, note: { ar: "", en: "" } },
+    { id: "egg", cat: "cooking", name: { ar: "بيض للتقديم الفوري", en: "Eggs for immediate service" }, temp: { ar: "63°م", en: "63°C" }, note: { ar: "بيض يُحفظ للتقديم لاحقاً يحتاج 74°م", en: "Eggs held for later service require 74°C" } },
+    { id: "reheat", cat: "cooking", name: { ar: "إعادة تسخين الأطعمة", en: "Reheating leftovers" }, temp: { ar: "74°م خلال ساعتين كحد أقصى", en: "74°C within 2 hours max" }, note: { ar: "", en: "" } },
+
+    { id: "fridge", cat: "storage", name: { ar: "التبريد (Refrigeration)", en: "Refrigeration" }, temp: { ar: "≤ 5°م", en: "≤ 5°C" }, note: { ar: "", en: "" } },
+    { id: "freezer", cat: "storage", name: { ar: "التجميد (Freezing)", en: "Freezing" }, temp: { ar: "≤ −18°م", en: "≤ −18°C" }, note: { ar: "", en: "" } },
+    { id: "hotHold", cat: "storage", name: { ar: "الحفظ الساخن (Hot Holding)", en: "Hot Holding" }, temp: { ar: "≥ 60°م", en: "≥ 60°C" }, note: { ar: "", en: "" } },
+    { id: "dangerZone", cat: "storage", name: { ar: "منطقة الخطر", en: "Danger Zone" }, temp: { ar: "5–60°م", en: "5–60°C" }, note: { ar: "لا يجوز بقاء الغذاء في هذا المدى أكثر من 4 ساعات إجمالاً", en: "Food must not remain in this range for more than 4 hours total" } },
+
+    { id: "recvChilled", cat: "receiving", name: { ar: "استلام مبرد", en: "Chilled receiving" }, temp: { ar: "قبول ≤ 5°م", en: "Accept ≤ 5°C" }, note: { ar: "ارفض أو وثّق الانحراف إذا تجاوزت 8°م", en: "Reject or document deviation if above 8°C" } },
+    { id: "recvFrozen", cat: "receiving", name: { ar: "استلام مجمد", en: "Frozen receiving" }, temp: { ar: "قبول ≤ −18°م", en: "Accept ≤ −18°C" }, note: { ar: "دون أي علامات ذوبان أو إعادة تجميد", en: "With no signs of thawing or refreezing" } },
+    { id: "recvHot", cat: "receiving", name: { ar: "استلام ساخن", en: "Hot food receiving" }, temp: { ar: "قبول ≥ 60°م", en: "Accept ≥ 60°C" }, note: { ar: "", en: "" } },
+
+    { id: "cool1", cat: "cooling", name: { ar: "التبريد السريع — المرحلة الأولى", en: "Rapid Cooling — Stage 1" }, temp: { ar: "60 → 21°م خلال ساعتين", en: "60 → 21°C within 2 hours" }, note: { ar: "", en: "" } },
+    { id: "cool2", cat: "cooling", name: { ar: "التبريد السريع — المرحلة الثانية", en: "Rapid Cooling — Stage 2" }, temp: { ar: "21 → 5°م خلال 4 ساعات إضافية", en: "21 → 5°C within an additional 4 hours" }, note: { ar: "الإجمالي: 6 ساعات كحد أقصى من 60°م حتى 5°م", en: "Total: 6 hours maximum from 60°C to 5°C" } }
+  ];
+
+  const CATEGORIES = ["cooking", "storage", "receiving", "cooling"];
+
+  // -------------------- بيانات فاحص القراءة (قواعد خبيرة قابلة للقراءة، بلا أرقام سحرية) --------------------
+  // كل قاعدة: نوع غذاء + حد أدنى (أو أقصى) للمطابقة + هامش الحالة الحدّية + نصوص الإجراء
+  const CHECKER_FOODS = {
+    cooking: [
+      { id: "poultry", okMin: 74, warnMargin: 3 },
+      { id: "groundMeat", okMin: 71, warnMargin: 3 },
+      { id: "wholeMeat", okMin: 63, warnMargin: 3 },
+      { id: "fish", okMin: 63, warnMargin: 3 },
+      { id: "egg", okMin: 63, warnMargin: 3 },
+      { id: "reheat", okMin: 74, warnMargin: 3 }
+    ],
+    receiving: [
+      { id: "recvChilled", okMax: 5, warnMax: 8 },
+      { id: "recvFrozen", okMax: -18, warnMax: -15 }
+    ],
+    hotHolding: [
+      { id: "hotHold", okMin: 60, warnMin: 57 }
+    ],
+    freezing: [
+      { id: "freezer", okMax: -18, warnMax: -15 }
+    ]
+  };
+
+  const CORRECTIVE_ACTIONS = {
+    cooking: {
+      warning: { ar: "استمر في الطبخ حتى الوصول للحد الأدنى الآمن ثم أعد القياس قبل التقديم.", en: "Continue cooking until the safe minimum is reached, then re-check before serving." },
+      fail: { ar: "أعد الطبخ حتى الحد الآمن أو تخلص من المنتج، ووثّق الانحراف في سجل المراقبة.", en: "Continue cooking to the safe limit or discard the product, and document the deviation." }
+    },
+    receivingChilled: {
+      warning: { ar: "ابدأ تبريد المنتج فوراً أو قيّم قبوله حسب سياسة المنشأة، ووثّق القراءة.", en: "Start chilling the product immediately or assess acceptance per facility policy, and document the reading." },
+      fail: { ar: "ارفض الاستلام ووثّق سبب الرفض.", en: "Reject the delivery and document the reason." }
+    },
+    receivingFrozen: {
+      warning: { ar: "تحقق من عدم وجود علامات ذوبان أو سوائل، اقبل بحذر ووثّق القراءة.", en: "Check for signs of thawing or liquid, accept with caution and document the reading." },
+      fail: { ar: "ارفض الاستلام ووثّق سبب الرفض.", en: "Reject the delivery and document the reason." }
+    },
+    hotHolding: {
+      warning: { ar: "ارفع الحرارة فوراً إلى 60°م أو أعد التسخين لـ74°م إذا لم تتجاوز المدة في منطقة الخطر ساعتين.", en: "Raise the temperature to 60°C immediately, or reheat to 74°C if time in the danger zone has not exceeded 2 hours." },
+      fail: { ar: "أعد التسخين فوراً لـ74°م إذا كانت مدة منطقة الخطر أقل من ساعتين، وإلا تخلص من المنتج ووثّق الانحراف.", en: "Reheat immediately to 74°C if danger-zone time is under 2 hours; otherwise discard the product and document the deviation." }
+    },
+    freezing: {
+      warning: { ar: "تحقق من إحكام غلق الباب وسجل الحرارة، وأعد الفحص خلال ساعة.", en: "Check the door seal and temperature log, and re-check within an hour." },
+      fail: { ar: "انقل المنتجات إلى مجمد بديل فوراً، وثّق الانحراف، وأبلغ المسؤول المباشر.", en: "Move products to a backup freezer immediately, document the deviation, and notify the supervisor." }
+    }
+  };
+
+  // -------------------- التبويبات --------------------
+  function setupTabs() {
+    const buttons = document.querySelectorAll(".tab-btn");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+      });
+    });
+  }
+
+  // -------------------- TAB A: الدليل المرجعي --------------------
+  function renderFilterSelect() {
+    const select = document.getElementById("g-filter");
+    select.innerHTML = `<option value="all">${t("temperature.filterAll")}</option>` +
+      CATEGORIES.map((cat) => `<option value="${cat}">${t("temperature.categories." + cat)}</option>`).join("");
+  }
+
+  function renderGuideGrid() {
+    const lang = getLang();
+    const query = document.getElementById("g-search").value.trim().toLowerCase();
+    const filterCat = document.getElementById("g-filter").value;
+
+    const filtered = GUIDE_ITEMS.filter((item) => {
+      const matchesCat = filterCat === "all" || item.cat === filterCat;
+      const haystack = (item.name.ar + " " + item.name.en + " " + item.note.ar + " " + item.note.en).toLowerCase();
+      const matchesQuery = query === "" || haystack.includes(query);
+      return matchesCat && matchesQuery;
+    });
+
+    const grid = document.getElementById("g-grid");
+    if (filtered.length === 0) {
+      grid.innerHTML = `<p>${t("common.noRecords")}</p>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map((item) => `
+      <div class="ref-card">
+        <span class="ref-cat">${t("temperature.categories." + item.cat)}</span>
+        <h3>${item.name[lang]}</h3>
+        <div class="ref-temp">${item.temp[lang]}</div>
+        ${item.note[lang] ? `<div class="ref-note">${item.note[lang]}</div>` : ""}
+      </div>
+    `).join("");
+  }
+
+  // -------------------- TAB B: فاحص القراءة --------------------
+  function renderOperationSelect() {
+    const select = document.getElementById("chk-operation");
+    const ops = ["cooking", "receiving", "hotHolding", "freezing", "cooling"];
+    select.innerHTML = ops.map((op) => `<option value="${op}">${t("temperature.operations." + op)}</option>`).join("");
+  }
+
+  function renderFoodSelect() {
+    const operation = document.getElementById("chk-operation").value;
+    const foodField = document.getElementById("chk-food-field");
+    const elapsedField = document.getElementById("chk-elapsed-field");
+    const select = document.getElementById("chk-food");
+
+    if (operation === "cooling") {
+      foodField.hidden = true;
+      elapsedField.hidden = false;
+      select.innerHTML = "";
+      return;
+    }
+
+    foodField.hidden = false;
+    elapsedField.hidden = true;
+    const lang = getLang();
+    const foods = CHECKER_FOODS[operation] || [];
+    select.innerHTML = foods.map((f) => {
+      const item = GUIDE_ITEMS.find((g) => g.id === f.id);
+      return `<option value="${f.id}">${item.name[lang]}</option>`;
+    }).join("");
+  }
+
+  function evaluateCooking(rule, reading) {
+    if (reading >= rule.okMin) return "ok";
+    if (reading >= rule.okMin - rule.warnMargin) return "warning";
+    return "fail";
+  }
+
+  function evaluateMinBased(rule, reading) {
+    if (reading >= rule.okMin) return "ok";
+    if (reading >= rule.warnMin) return "warning";
+    return "fail";
+  }
+
+  function evaluateMaxBased(rule, reading) {
+    if (reading <= rule.okMax) return "ok";
+    if (reading <= rule.warnMax) return "warning";
+    return "fail";
+  }
+
+  function calcChecker() {
+    const operation = document.getElementById("chk-operation").value;
+    const readingRaw = document.getElementById("chk-reading").value;
+    const readingCheck = parseNumberField(readingRaw, { min: -50, max: 300 });
+    let valid = true;
+
+    if (!readingCheck.ok) { showFieldError("chk-reading", "chk-reading-error", readingCheck.error); valid = false; }
+    else showFieldError("chk-reading", "chk-reading-error", null);
+
+    let elapsedCheck = null;
+    if (operation === "cooling") {
+      elapsedCheck = parseNumberField(document.getElementById("chk-elapsed").value, { min: 0, max: 48 });
+      if (!elapsedCheck.ok) { showFieldError("chk-elapsed", "chk-elapsed-error", elapsedCheck.error); valid = false; }
+      else showFieldError("chk-elapsed", "chk-elapsed-error", null);
+    }
+
+    if (!valid) { document.getElementById("chk-result").hidden = true; return; }
+
+    const reading = readingCheck.value;
+    let status, actionText, foodLabel;
+
+    if (operation === "cooling") {
+      const elapsed = elapsedCheck.value;
+      const result = evaluateCooling(reading, elapsed);
+      status = result.status;
+      actionText = result.action[getLang()];
+      foodLabel = t("temperature.operations.cooling");
+    } else {
+      const foodId = document.getElementById("chk-food").value;
+      const rule = CHECKER_FOODS[operation].find((f) => f.id === foodId);
+      const guideItem = GUIDE_ITEMS.find((g) => g.id === foodId);
+      foodLabel = guideItem.name[getLang()];
+
+      if (operation === "cooking") {
+        status = evaluateCooking(rule, reading);
+        actionText = status === "ok" ? null : CORRECTIVE_ACTIONS.cooking[status][getLang()];
+      } else if (operation === "receiving") {
+        status = evaluateMaxBased(rule, reading);
+        const bucket = foodId === "recvChilled" ? "receivingChilled" : "receivingFrozen";
+        actionText = status === "ok" ? null : CORRECTIVE_ACTIONS[bucket][status][getLang()];
+      } else if (operation === "hotHolding") {
+        status = evaluateMinBased(rule, reading);
+        actionText = status === "ok" ? null : CORRECTIVE_ACTIONS.hotHolding[status][getLang()];
+      } else if (operation === "freezing") {
+        status = evaluateMaxBased(rule, reading);
+        actionText = status === "ok" ? null : CORRECTIVE_ACTIONS.freezing[status][getLang()];
+      }
+    }
+
+    renderCheckerResult({ operation, foodLabel, reading, status, actionText, elapsed: elapsedCheck ? elapsedCheck.value : null });
+  }
+
+  // منحنى التبريد السريع من الكودكس: 60→21°م خلال ساعتين، ثم 21→5°م خلال 4 ساعات إضافية (6 ساعات إجمالاً)
+  function evaluateCooling(reading, elapsedHours) {
+    if (elapsedHours <= 2) {
+      if (reading <= 21) return { status: "ok", action: { ar: "المسار ضمن الحد الآمن، استمر في المراقبة حسب الجدول الزمني.", en: "On track and within safe limits, continue monitoring per schedule." } };
+      if (reading <= 21 + 5) return { status: "warning", action: { ar: "أسرع التبريد الآن (تقسيم لأجزاء أصغر، حمام ثلج، مروحة تبريد) وأعد القياس قريباً.", en: "Speed up cooling now (smaller portions, ice bath, blast fan) and re-check soon." } };
+      return { status: "fail", action: { ar: "تجاوز الحد الأول (60→21°م خلال ساعتين) — أعد تسخين المنتج لـ74°م ثم أعد التبريد من جديد وفق الجدول، أو تخلص منه.", en: "Stage 1 limit exceeded (60→21°C within 2h) — reheat to 74°C and restart cooling per schedule, or discard." } };
+    }
+    if (elapsedHours <= 6) {
+      if (reading <= 5) return { status: "ok", action: { ar: "المسار ضمن الحد الآمن.", en: "On track and within safe limits." } };
+      if (reading <= 5 + 5) return { status: "warning", action: { ar: "أسرع التبريد الآن وأعد القياس، الوقت المتبقي محدود قبل تجاوز 6 ساعات إجمالاً.", en: "Speed up cooling and re-check now; limited time remains before the 6-hour total." } };
+      return { status: "fail", action: { ar: "تجاوز الجدول الزمني الكلي للتبريد (6 ساعات من 60 إلى 5°م) — تخلص من المنتج ووثّق الانحراف.", en: "Total cooling schedule exceeded (6 hours from 60 to 5°C) — discard the product and document the deviation." } };
+    }
+    if (reading <= 5) return { status: "ok", action: { ar: "تم الوصول للحد الآمن، لكن تحقق من توثيق الوقت الكلي المستغرق.", en: "Safe limit reached, but verify the total elapsed time was documented." } };
+    return { status: "fail", action: { ar: "تجاوز الوقت الكلي المسموح للتبريد (6 ساعات) — تخلص من المنتج ووثّق الانحراف.", en: "Total allowed cooling time exceeded (6 hours) — discard the product and document the deviation." } };
+  }
+
+  function renderCheckerResult(data) {
+    const { operation, foodLabel, reading, status, actionText, elapsed } = data;
+    const box = document.getElementById("chk-result");
+    box.hidden = false;
+    box.className = status === "ok" ? "result-box" : (status === "warning" ? "result-box warning" : "result-box danger");
+
+    const verdictText = t("temperature.verdicts." + status);
+    box.innerHTML = `
+      <p class="result-sentence">${verdictText}</p>
+      <div class="result-figures">
+        <div class="result-figure"><div class="value">${reading}°${getLang() === "ar" ? "م" : "C"}</div><div class="label" data-i18n="temperature.checkerReading"></div></div>
+      </div>
+      ${actionText ? `<p><strong data-i18n="temperature.correctiveActionLabel"></strong> ${actionText}</p>` : ""}
+      <div class="no-print" style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1rem;">
+        <button type="button" class="btn btn-ghost btn-sm" id="chk-print-btn" data-i18n="common.printRecord"></button>
+      </div>
+    `;
+    applyI18n(box);
+
+    document.getElementById("chk-print-btn").addEventListener("click", () => {
+      const rows = [
+        [t("temperature.checkerOperation"), t("temperature.operations." + operation)],
+        [t("temperature.checkerFood"), foodLabel],
+        [t("temperature.checkerReading"), reading + "°" + (getLang() === "ar" ? "م" : "C")]
+      ];
+      if (elapsed !== null) rows.push([t("temperature.checkerElapsed"), elapsed]);
+      rows.push([verdictText, ""]);
+      if (actionText) rows.push([t("temperature.correctiveActionLabel"), actionText]);
+      printRecordSheet({ titleKey: "temperature.pageTitle", rows });
+    });
+  }
+
+  function showFieldError(inputId, errorId, error) {
+    const field = document.getElementById(inputId).closest(".field");
+    const errorEl = document.getElementById(errorId);
+    if (error) {
+      field.classList.add("has-error");
+      errorEl.textContent = error;
+    } else {
+      field.classList.remove("has-error");
+      errorEl.textContent = "";
+    }
+  }
+
+  // -------------------- التهيئة --------------------
+  function renderAll() {
+    renderFilterSelect();
+    renderGuideGrid();
+    renderOperationSelect();
+    renderFoodSelect();
+    if (!document.getElementById("chk-result").hidden) calcChecker();
+  }
+
+  function init() {
+    initApp({ basePath: "../", activeToolId: "temperature" });
+    setupTabs();
+    renderAll();
+
+    document.getElementById("g-search").addEventListener("input", renderGuideGrid);
+    document.getElementById("g-filter").addEventListener("change", renderGuideGrid);
+    document.getElementById("chk-operation").addEventListener("change", renderFoodSelect);
+    document.getElementById("chk-calc-btn").addEventListener("click", calcChecker);
+
+    document.addEventListener("i18n:change", renderAll);
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>
