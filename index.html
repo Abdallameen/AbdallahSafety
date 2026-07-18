@@ -3,301 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مؤسسة ركن الخليج العربي | AGC Medical</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<title>عُدّة أخصائي سلامة الغذاء</title>
+<meta name="description" content="أدوات مجانية عملية لأخصائيي سلامة الغذاء — تعمل بدون إنترنت">
+<meta name="theme-color" content="#0B6E4F">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
+<body data-page-title-i18n="home.heroTitle">
+<a class="skip-link" href="#main-content">تخطي إلى المحتوى / Skip to content</a>
+<div id="app-header"></div>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="topbar-inner">
-    <span class="topbar-phone"><i class="fas fa-phone-alt"></i> +966 56 096 7982</span>
-    <span class="topbar-sep">|</span>
-    <span><i class="fas fa-clock"></i> الأحد–الخميس: 9ص–6م</span>
-    <span class="topbar-sep">|</span>
-    <a href="contact.html"><i class="fas fa-envelope"></i> info@agc-medical.com</a>
-  </div>
-</div>
+<main id="main-content">
+  <section class="hero">
+    <h1 data-i18n="home.heroTitle"></h1>
+    <p data-i18n="home.heroSubtitle"></p>
+    <span class="hero-note" data-i18n="home.heroNote"></span>
+  </section>
 
-<!-- MAIN HEADER -->
-<header class="header">
-  <div class="header-inner">
+  <section aria-labelledby="tools-heading">
+    <h2 id="tools-heading" data-i18n="home.toolsTitle"></h2>
+    <div class="tools-grid" id="toolsGrid"></div>
+  </section>
 
-    <!-- Logo -->
-    <a href="index.html" class="logo">
-      <div class="logo-icon">AGC</div>
-      <div class="logo-text">
-        <span class="logo-ar">ركن الخليج العربي</span>
-        <span class="logo-en">Arabian Gulf Corner</span>
-      </div>
-    </a>
+  <section class="about-section" aria-labelledby="about-heading">
+    <h2 id="about-heading" data-i18n="home.aboutTitle"></h2>
+    <p data-i18n="home.aboutText"></p>
+    <ul class="about-list">
+      <li data-i18n="home.aboutPoint1"></li>
+      <li data-i18n="home.aboutPoint2"></li>
+      <li data-i18n="home.aboutPoint3"></li>
+      <li data-i18n="home.aboutPoint4"></li>
+    </ul>
+  </section>
+</main>
 
-    <!-- Search Bar -->
-    <div class="search-wrap">
-      <div class="search-bar">
-        <select class="search-cat" id="searchCat">
-          <option value="all">كل الأقسام</option>
-        </select>
-        <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن أجهزة طبية، مستلزمات، معامل...">
-        <button class="search-btn" onclick="doSearch()"><i class="fas fa-search"></i></button>
-      </div>
-    </div>
+<div id="app-footer"></div>
 
-    <!-- Header Actions -->
-    <div class="header-actions">
-      <a href="contact.html" class="hdr-btn">
-        <i class="fas fa-headset"></i>
-        <span>تواصل معنا</span>
-      </a>
-      <a href="https://wa.me/966560967982" target="_blank" class="hdr-btn hdr-whatsapp">
-        <i class="fab fa-whatsapp"></i>
-        <span>واتساب</span>
-      </a>
-    </div>
+<script src="assets/i18n.js"></script>
+<script src="assets/app.js"></script>
+<script>
+  function renderToolsGrid() {
+    const grid = document.getElementById("toolsGrid");
+    grid.innerHTML = TOOLS_REGISTRY.map((tool) => {
+      const name = t(`home.tools.${tool.id}.name`);
+      const desc = t(`home.tools.${tool.id}.desc`);
+      const soonBadge = tool.available ? "" : `<span class="badge-soon" data-i18n="home.comingSoonBadge"></span>`;
+      const tag = tool.available ? "a" : "div";
+      const hrefAttr = tool.available ? `href="${tool.href}"` : "";
+      const openBtn = tool.available
+        ? `<span class="btn btn-primary btn-sm btn-block" data-i18n="home.openTool"></span>`
+        : "";
+      return `
+        <${tag} class="tool-card${tool.available ? "" : " disabled"}" ${hrefAttr} aria-disabled="${!tool.available}">
+          ${soonBadge}
+          <div class="tool-icon" aria-hidden="true">${tool.icon}</div>
+          <h3>${name}</h3>
+          <p class="tool-desc">${desc}</p>
+          ${openBtn}
+        </${tag}>
+      `;
+    }).join("");
+    applyI18n(grid);
+  }
 
-  </div>
-
-  <!-- NAV BAR -->
-  <nav class="navbar">
-    <div class="navbar-inner">
-      <button class="nav-all-btn" onclick="toggleMegaMenu()">
-        <i class="fas fa-th-large"></i> جميع الأقسام
-      </button>
-      <div class="nav-links" id="navLinks"></div>
-      <div class="nav-lang">
-        <button onclick="setLang('ar')" class="lang-btn active" id="btnAr">🇸🇦 عربي</button>
-        <button onclick="setLang('en')" class="lang-btn" id="btnEn">🇬🇧 EN</button>
-      </div>
-    </div>
-    <!-- Mega Menu -->
-    <div class="mega-menu" id="megaMenu"></div>
-  </nav>
-</header>
-
-<!-- HERO SECTION -->
-<section class="hero">
-  <div class="hero-slides" id="heroSlides">
-    <div class="hero-slide active" style="background: linear-gradient(135deg, #0a3d6b 0%, #0d6efd 60%, #00b4d8 100%);">
-      <div class="hero-content">
-        <div class="hero-badge">⚡ توريد فوري</div>
-        <h1>أجهزة طبية متخصصة<br><span>بأعلى معايير الجودة</span></h1>
-        <p>نوفر أحدث المعدات الطبية للمستشفيات والمستوصفات والعيادات في المملكة العربية السعودية</p>
-        <div class="hero-btns">
-          <button onclick="filterByCategory('all')" class="hero-btn-primary">تسوق الآن</button>
-          <a href="contact.html" class="hero-btn-secondary">اطلب عرض سعر</a>
-        </div>
-      </div>
-      <div class="hero-graphic">
-        <div class="hero-circle c1"></div>
-        <div class="hero-circle c2"></div>
-        <div class="hero-circle c3"></div>
-        <div class="hero-icon-grid">
-          <div class="hig-item"><i class="fas fa-microscope"></i></div>
-          <div class="hig-item"><i class="fas fa-x-ray"></i></div>
-          <div class="hig-item"><i class="fas fa-heartbeat"></i></div>
-          <div class="hig-item"><i class="fas fa-tooth"></i></div>
-          <div class="hig-item"><i class="fas fa-vial"></i></div>
-          <div class="hig-item"><i class="fas fa-syringe"></i></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Stats Bar -->
-  <div class="stats-bar">
-    <div class="stat-item">
-      <strong id="statProducts">0</strong>
-      <span>منتج طبي</span>
-    </div>
-    <div class="stat-item">
-      <strong>10+</strong>
-      <span>تخصصات طبية</span>
-    </div>
-    <div class="stat-item">
-      <strong>⚡</strong>
-      <span>توريد فوري</span>
-    </div>
-    <div class="stat-item">
-      <strong>KSA</strong>
-      <span>خدمة المملكة</span>
-    </div>
-  </div>
-</section>
-
-<!-- CATEGORY CARDS -->
-<section class="cat-section">
-  <div class="section-container">
-    <div class="section-header">
-      <h2 class="section-title">تسوق حسب التخصص</h2>
-      <div class="section-line"></div>
-    </div>
-    <div class="cat-cards" id="catCards"></div>
-  </div>
-</section>
-
-<!-- INSTANT SUPPLY STRIP -->
-<div class="instant-strip" id="instantStrip">
-  <div class="instant-strip-inner">
-    <div class="is-label"><i class="fas fa-bolt"></i> متوفر للتوريد الفوري</div>
-    <div class="is-scroll" id="isScroll"></div>
-  </div>
-</div>
-
-<!-- PRODUCTS SECTION -->
-<section class="products-section" id="productsSection">
-  <div class="section-container">
-
-    <!-- Breadcrumb & Controls -->
-    <div class="products-toolbar">
-      <div class="breadcrumb" id="breadcrumb">
-        <span onclick="filterByCategory('all')" class="bc-home"><i class="fas fa-home"></i> الرئيسية</span>
-        <span class="bc-sep">›</span>
-        <span id="bc-current">جميع المنتجات</span>
-      </div>
-      <div class="toolbar-controls">
-        <span class="results-count" id="resultsCount"></span>
-        <div class="view-toggle">
-          <button class="vt-btn active" id="gridViewBtn" onclick="setView('grid')"><i class="fas fa-th"></i></button>
-          <button class="vt-btn" id="listViewBtn" onclick="setView('list')"><i class="fas fa-list"></i></button>
-        </div>
-        <select class="sort-sel" id="sortSelect">
-          <option value="default">ترتيب افتراضي</option>
-          <option value="price-asc">السعر: الأقل أولاً</option>
-          <option value="price-desc">السعر: الأعلى أولاً</option>
-          <option value="name">حسب الاسم</option>
-          <option value="instant">التوريد الفوري أولاً</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="products-layout">
-      <!-- Sidebar Filter -->
-      <aside class="filter-sidebar" id="filterSidebar">
-        <div class="filter-block">
-          <div class="filter-title"><i class="fas fa-filter"></i> التصنيفات</div>
-          <ul class="filter-list" id="filterList"></ul>
-        </div>
-        <div class="filter-block">
-          <div class="filter-title"><i class="fas fa-bolt"></i> التوريد</div>
-          <label class="filter-check">
-            <input type="checkbox" id="instantFilter" onchange="renderProducts()">
-            <span>توريد فوري فقط</span>
-          </label>
-        </div>
-        <div class="filter-block">
-          <div class="filter-title"><i class="fas fa-tags"></i> نطاق السعر</div>
-          <div class="price-range">
-            <input type="number" id="priceMin" placeholder="من" onchange="renderProducts()">
-            <span>–</span>
-            <input type="number" id="priceMax" placeholder="إلى" onchange="renderProducts()">
-          </div>
-        </div>
-      </aside>
-
-      <!-- Products Grid -->
-      <div class="products-main">
-        <div class="products-grid" id="productsGrid"></div>
-        <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
-          <button class="load-more-btn" onclick="loadMore()">عرض المزيد <i class="fas fa-chevron-down"></i></button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- WHY US SECTION -->
-<section class="why-section">
-  <div class="section-container">
-    <h2 class="section-title" style="color:white">لماذا ركن الخليج العربي؟</h2>
-    <div class="why-grid">
-      <div class="why-card">
-        <div class="why-icon"><i class="fas fa-certificate"></i></div>
-        <h3>جودة معتمدة</h3>
-        <p>جميع منتجاتنا معتمدة ومطابقة للمعايير الدولية</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon"><i class="fas fa-bolt"></i></div>
-        <h3>توريد فوري</h3>
-        <p>منتجات متوفرة في المستودع جاهزة للشحن الفوري</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon"><i class="fas fa-headset"></i></div>
-        <h3>دعم متخصص</h3>
-        <p>فريق دعم فني متخصص على مدار الأسبوع</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon"><i class="fas fa-shield-alt"></i></div>
-        <h3>ضمان شامل</h3>
-        <p>ضمان على جميع الأجهزة مع خدمة ما بعد البيع</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="footer-col">
-      <div class="footer-logo">
-        <div class="logo-icon sm">AGC</div>
-        <div>
-          <div class="logo-ar" style="font-size:16px">ركن الخليج العربي</div>
-          <div class="logo-en" style="font-size:12px;opacity:.7">Arabian Gulf Corner</div>
-        </div>
-      </div>
-      <p class="footer-desc">متخصصون في توريد الأجهزة والمستلزمات الطبية للمستشفيات والعيادات في المملكة العربية السعودية.</p>
-      <div class="footer-social">
-        <a href="https://wa.me/966560967982" target="_blank" class="social-btn wa"><i class="fab fa-whatsapp"></i></a>
-        <a href="mailto:info@agc-medical.com" class="social-btn em"><i class="fas fa-envelope"></i></a>
-        <a href="tel:+966560967982" class="social-btn ph"><i class="fas fa-phone"></i></a>
-      </div>
-    </div>
-    <div class="footer-col">
-      <h4>الأقسام الرئيسية</h4>
-      <ul class="footer-links" id="footerCatLinks"></ul>
-    </div>
-    <div class="footer-col">
-      <h4>روابط سريعة</h4>
-      <ul class="footer-links">
-        <li><a href="index.html"><i class="fas fa-home"></i> الصفحة الرئيسية</a></li>
-        <li><a href="contact.html"><i class="fas fa-envelope"></i> اتصل بنا</a></li>
-        <li><a href="https://wa.me/966560967982" target="_blank"><i class="fab fa-whatsapp"></i> واتساب مباشر</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>تواصل معنا</h4>
-      <div class="footer-contact-info">
-        <div><i class="fas fa-phone"></i> <span dir="ltr">+966 56 096 7982</span></div>
-        <div><i class="fas fa-envelope"></i> info@agc-medical.com</div>
-        <div><i class="fas fa-map-marker-alt"></i> المملكة العربية السعودية – الرياض</div>
-        <div><i class="fas fa-clock"></i> الأحد–الخميس: 9ص – 6م</div>
-      </div>
-      <a href="https://wa.me/966560967982?text=مرحباً، أريد الاستفسار عن منتج" target="_blank" class="footer-wa-btn">
-        <i class="fab fa-whatsapp"></i> ابدأ محادثة الآن
-      </a>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p>© 2026 مؤسسة ركن الخليج العربي | Arabian Gulf Corner (AGC) – جميع الحقوق محفوظة</p>
-  </div>
-</footer>
-
-<!-- QUICK VIEW MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
-<div class="quick-modal" id="quickModal">
-  <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
-  <div id="modalContent"></div>
-</div>
-
-<!-- BACK TO TOP -->
-<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-  <i class="fas fa-chevron-up"></i>
-</button>
-
-<script src="data.js"></script>
-<script src="main.js"></script>
+  initApp({ basePath: "" });
+  renderToolsGrid();
+  document.addEventListener("i18n:change", renderToolsGrid);
+</script>
 </body>
 </html>
