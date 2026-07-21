@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مصفوفة المخاطر</title>
+<meta name="theme-color" content="#0B6E4F">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-page-title-i18n="risk.pageTitle">
+<a class="skip-link" href="#main-content">تخطي إلى المحتوى / Skip to content</a>
+<div id="app-header"></div>
+
+<main id="main-content">
+  <h1 data-i18n="risk.pageTitle"></h1>
+  <p data-i18n="risk.pageDesc"></p>
+
+  <div class="tabs no-print" role="tablist" aria-label="risk tabs">
+    <button class="tab-btn active" data-tab="assess" role="tab" aria-selected="true" data-i18n="risk.tabs.assess"></button>
+    <button class="tab-btn" data-tab="matrix" role="tab" aria-selected="false" data-i18n="risk.tabs.matrix"></button>
+    <button class="tab-btn" data-tab="log" role="tab" aria-selected="false" data-i18n="risk.tabs.log"></button>
+  </div>
+
+  <!-- ================= TAB A: ASSESS ================= -->
+  <section class="tab-panel active" id="panel-assess">
+    <div class="card">
+      <div class="field">
+        <label for="a-hazard" data-i18n="risk.hazardName"></label>
+        <input type="text" id="a-hazard">
+        <div class="field-error" id="a-hazard-error"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="a-likelihood" data-i18n="risk.likelihood"></label>
+          <select id="a-likelihood"></select>
+        </div>
+        <div class="field">
+          <label for="a-severity" data-i18n="risk.severity"></label>
+          <select id="a-severity"></select>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary btn-block" id="a-calc-btn" data-i18n="common.calculate"></button>
+      <div id="a-result" hidden></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB B: MATRIX ================= -->
+  <section class="tab-panel" id="panel-matrix">
+    <div class="card">
+      <h2 data-i18n="risk.matrixTitle"></h2>
+      <p class="tool-desc" data-i18n="risk.matrixNote"></p>
+      <div class="table-wrap">
+        <table class="matrix-table" id="matrix-grid"></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB C: LOG ================= -->
+  <section class="tab-panel" id="panel-log">
+    <div class="card">
+      <h2 data-i18n="risk.logTitle"></h2>
+      <div class="log-actions no-print">
+        <button type="button" class="btn btn-ghost btn-sm" id="log-export-btn" data-i18n="common.exportCsv"></button>
+        <button type="button" class="btn btn-ghost btn-sm" id="log-print-btn" data-i18n="common.print"></button>
+        <button type="button" class="btn btn-danger btn-sm" id="log-clear-btn" data-i18n="common.clearAll"></button>
+      </div>
+      <div class="table-wrap">
+        <table id="log-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="log-empty" data-i18n="risk.logEmpty" hidden></p>
+    </div>
+  </section>
+
+  <div class="print-only" id="printArea"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="../assets/i18n.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+  // -------------------- تصنيف الخطورة (احتمالية × شدة) --------------------
+  // النطاقات إرشادية عامة شائعة الاستخدام في تقييمات المخاطر (ليست معياراً رسمياً واحداً)
+  function getRiskLevel(score) {
+    if (score <= 4) return "low";
+    if (score <= 10) return "medium";
+    if (score <= 15) return "high";
+    return "critical";
+  }
+
+  const LEVEL_STATUS_CLASS = { low: "status-ok", medium: "status-warning", high: "status-orange", critical: "status-danger" };
+  const LEVEL_BOX_CLASS = { low: "result-box", medium: "result-box warning", high: "result-box danger", critical: "result-box danger" };
+  const LEVEL_MATRIX_CLASS = { low: "matrix-cell-low", medium: "matrix-cell-medium", high: "matrix-cell-high", critical: "matrix-cell-critical" };
+
+  function fillLevelSelects() {
+    const likelihoodSelect = document.getElementById("a-likelihood");
+    const severitySelect = document.getElementById("a-severity");
+    likelihoodSelect.innerHTML = [1, 2, 3, 4, 5].map((n) => `<option value="${n}">${t("risk.likelihoodLevels." + n)}</option>`).join("");
+    severitySelect.innerHTML = [1, 2, 3, 4, 5].map((n) => `<option value="${n}">${t("risk.severityLevels." + n)}</option>`).join("");
+  }
+
+  function showFieldError(inputId, errorId, error) {
+    const field = document.getElementById(inputId).closest(".field");
+    const errorEl = document.getElementById(errorId);
+    if (error) { field.classList.add("has-error"); errorEl.textContent = error; }
+    else { field.classList.remove("has-error"); errorEl.textContent = ""; }
+  }
+
+  let lastAssessment = null;
+
+  function calcAssessment() {
+    const hazard = document.getElementById("a-hazard").value.trim();
+    if (!hazard) { showFieldError("a-hazard", "a-hazard-error", t("common.required")); document.getElementById("a-result").hidden = true; return; }
+    showFieldError("a-hazard", "a-hazard-error", null);
+
+    const likelihood = Number(document.getElementById("a-likelihood").value);
+    const severity = Number(document.getElementById("a-severity").value);
+    const score = likelihood * severity;
+    const level = getRiskLevel(score);
+
+    const box = document.getElementById("a-result");
+    box.hidden = false;
+    box.className = LEVEL_BOX_CLASS[level];
+    box.innerHTML = `
+      <p class="result-sentence">${hazard} — <span class="status-pill ${LEVEL_STATUS_CLASS[level]}">${t("risk.levels." + level)}</span></p>
+      <div class="result-figures">
+        <div class="result-figure"><div class="value">${score}</div><div class="label" data-i18n="risk.riskScore"></div></div>
+        <div class="result-figure"><div class="value">${t("risk.levels." + level)}</div><div class="label" data-i18n="risk.riskLevel"></div></div>
+      </div>
+      <p>${t("risk.actions." + level)}</p>
+      <div class="no-print" style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1rem;">
+        <button type="button" class="btn btn-secondary btn-sm" id="a-save-btn" data-i18n="risk.addBtn"></button>
+        <button type="button" class="btn btn-ghost btn-sm" id="a-print-btn" data-i18n="common.printRecord"></button>
+      </div>
+    `;
+    applyI18n(box);
+
+    lastAssessment = {
+      id: uid(),
+      dateTime: formatDateTime(),
+      hazard,
+      likelihood,
+      severity,
+      score,
+      level
+    };
+
+    document.getElementById("a-save-btn").addEventListener("click", () => {
+      const log = loadJSON(STORAGE_KEYS.riskLog, []);
+      log.unshift(lastAssessment);
+      saveJSON(STORAGE_KEYS.riskLog, log);
+      renderLog();
+    });
+    document.getElementById("a-print-btn").addEventListener("click", () => {
+      printRecordSheet({
+        titleKey: "risk.pageTitle",
+        rows: [
+          [t("risk.hazardName"), hazard],
+          [t("risk.likelihood"), t("risk.likelihoodLevels." + likelihood)],
+          [t("risk.severity"), t("risk.severityLevels." + severity)],
+          [t("risk.riskScore"), score],
+          [t("risk.riskLevel"), t("risk.levels." + level)],
+          [t("risk.actions." + level), ""]
+        ]
+      });
+    });
+  }
+
+  // -------------------- المصفوفة المرجعية (خريطة حرارية 5×5) --------------------
+  function renderMatrixGrid() {
+    const table = document.getElementById("matrix-grid");
+    let html = `<tr><th></th>${[1, 2, 3, 4, 5].map((l) => `<th>${t("risk.likelihoodLevels." + l)}</th>`).join("")}</tr>`;
+    for (let s = 5; s >= 1; s--) {
+      html += `<tr><th>${t("risk.severityLevels." + s)}</th>`;
+      for (let l = 1; l <= 5; l++) {
+        const score = s * l;
+        const level = getRiskLevel(score);
+        html += `<td class="${LEVEL_MATRIX_CLASS[level]}">${score}</td>`;
+      }
+      html += "</tr>";
+    }
+    table.innerHTML = html;
+  }
+
+  // -------------------- التبويبات --------------------
+  function setupTabs() {
+    const buttons = document.querySelectorAll(".tab-btn");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+        if (btn.dataset.tab === "matrix") renderMatrixGrid();
+        if (btn.dataset.tab === "log") renderLog();
+      });
+    });
+  }
+
+  // -------------------- السجل --------------------
+  function renderLog() {
+    const log = loadJSON(STORAGE_KEYS.riskLog, []);
+    const table = document.getElementById("log-table");
+    const thead = table.querySelector("thead");
+    const tbody = table.querySelector("tbody");
+    const emptyMsg = document.getElementById("log-empty");
+
+    thead.innerHTML = `<tr>
+      <th data-i18n="risk.logCols.hazard"></th>
+      <th data-i18n="risk.logCols.likelihood"></th>
+      <th data-i18n="risk.logCols.severity"></th>
+      <th data-i18n="risk.logCols.score"></th>
+      <th data-i18n="risk.logCols.level"></th>
+      <th data-i18n="risk.logCols.date"></th>
+      <th class="no-print"></th>
+    </tr>`;
+    applyI18n(thead);
+
+    emptyMsg.hidden = log.length > 0;
+    table.hidden = log.length === 0;
+
+    tbody.innerHTML = log.map((entry) => `
+      <tr>
+        <td>${entry.hazard}</td>
+        <td>${t("risk.likelihoodLevels." + entry.likelihood)}</td>
+        <td>${t("risk.severityLevels." + entry.severity)}</td>
+        <td>${entry.score}</td>
+        <td><span class="status-pill ${LEVEL_STATUS_CLASS[entry.level]}">${t("risk.levels." + entry.level)}</span></td>
+        <td>${entry.dateTime}</td>
+        <td class="no-print"><button type="button" class="btn btn-icon" data-delete="${entry.id}" aria-label="delete">🗑️</button></td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll("[data-delete]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (!confirm(t("common.confirmDelete"))) return;
+        const id = btn.getAttribute("data-delete");
+        const newLog = loadJSON(STORAGE_KEYS.riskLog, []).filter((e) => e.id !== id);
+        saveJSON(STORAGE_KEYS.riskLog, newLog);
+        renderLog();
+      });
+    });
+  }
+
+  function wireLogActions() {
+    document.getElementById("log-clear-btn").addEventListener("click", () => {
+      if (!confirm(t("common.confirmClearAll"))) return;
+      saveJSON(STORAGE_KEYS.riskLog, []);
+      renderLog();
+    });
+    document.getElementById("log-export-btn").addEventListener("click", () => {
+      const log = loadJSON(STORAGE_KEYS.riskLog, []);
+      const headers = [t("risk.logCols.hazard"), t("risk.logCols.likelihood"), t("risk.logCols.severity"), t("risk.logCols.score"), t("risk.logCols.level"), t("risk.logCols.date")];
+      const rows = log.map((e) => [e.hazard, t("risk.likelihoodLevels." + e.likelihood), t("risk.severityLevels." + e.severity), e.score, t("risk.levels." + e.level), e.dateTime]);
+      downloadCsv("risk-log.csv", headers, rows);
+    });
+    document.getElementById("log-print-btn").addEventListener("click", () => window.print());
+  }
+
+  // -------------------- التهيئة --------------------
+  function renderAll() {
+    fillLevelSelects();
+    if (document.getElementById("panel-matrix").classList.contains("active")) renderMatrixGrid();
+    if (document.getElementById("panel-log").classList.contains("active")) renderLog();
+    if (!document.getElementById("a-result").hidden) calcAssessment();
+  }
+
+  function init() {
+    initApp({ basePath: "../", activeToolId: "risk" });
+    setupTabs();
+    fillLevelSelects();
+    renderLog();
+
+    document.getElementById("a-calc-btn").addEventListener("click", calcAssessment);
+    wireLogActions();
+    document.addEventListener("i18n:change", renderAll);
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>

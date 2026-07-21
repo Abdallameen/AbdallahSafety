@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شجرة قرار HACCP</title>
+<meta name="theme-color" content="#0B6E4F">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-page-title-i18n="haccp.pageTitle">
+<a class="skip-link" href="#main-content">تخطي إلى المحتوى / Skip to content</a>
+<div id="app-header"></div>
+
+<main id="main-content">
+  <h1 data-i18n="haccp.pageTitle"></h1>
+  <p data-i18n="haccp.pageDesc"></p>
+
+  <div class="tabs no-print" role="tablist" aria-label="haccp tabs">
+    <button class="tab-btn active" data-tab="wizard" role="tab" aria-selected="true" data-i18n="haccp.tabs.wizard"></button>
+    <button class="tab-btn" data-tab="log" role="tab" aria-selected="false" data-i18n="haccp.tabs.log"></button>
+  </div>
+
+  <!-- ================= TAB A: WIZARD ================= -->
+  <section class="tab-panel active" id="panel-wizard">
+    <div class="card">
+      <div class="field">
+        <label for="w-step" data-i18n="haccp.stepName"></label>
+        <input type="text" id="w-step">
+        <div class="field-error" id="w-step-error"></div>
+      </div>
+      <div class="field">
+        <label for="w-hazard-type" data-i18n="haccp.hazardType"></label>
+        <select id="w-hazard-type"></select>
+      </div>
+      <div class="field">
+        <label for="w-hazard-desc" data-i18n="haccp.hazardDesc"></label>
+        <input type="text" id="w-hazard-desc">
+        <div class="field-error" id="w-hazard-desc-error"></div>
+      </div>
+      <button type="button" class="btn btn-primary btn-block" id="w-start-btn" data-i18n="common.calculate"></button>
+    </div>
+
+    <div class="card" id="w-question-card" style="margin-top:1rem;" hidden></div>
+    <div id="w-result" hidden></div>
+  </section>
+
+  <!-- ================= TAB B: LOG ================= -->
+  <section class="tab-panel" id="panel-log">
+    <div class="card">
+      <h2 data-i18n="haccp.logTitle"></h2>
+      <div class="log-actions no-print">
+        <button type="button" class="btn btn-ghost btn-sm" id="log-export-btn" data-i18n="common.exportCsv"></button>
+        <button type="button" class="btn btn-ghost btn-sm" id="log-print-btn" data-i18n="common.print"></button>
+        <button type="button" class="btn btn-danger btn-sm" id="log-clear-btn" data-i18n="common.clearAll"></button>
+      </div>
+      <div class="table-wrap">
+        <table id="log-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="log-empty" data-i18n="haccp.logEmpty" hidden></p>
+    </div>
+  </section>
+
+  <div class="print-only" id="printArea"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="../assets/i18n.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+  // -------------------- آلة الحالة لشجرة قرار الكودكس --------------------
+  // كل عقدة: سؤال + دالة تحدد العقدة/الحكم التالي بناءً على الإجابة
+  const TREE = {
+    q1: {
+      textKey: "haccp.q1",
+      onYes: { next: "q2" },
+      onNo: { next: "q1b" }
+    },
+    q1b: {
+      textKey: "haccp.q1b",
+      onYes: { verdict: "modify", reasonKey: "haccp.reasons.q1bYes" },
+      onNo: { verdict: "notCCP", reasonKey: "haccp.reasons.q1bNo" }
+    },
+    q2: {
+      textKey: "haccp.q2",
+      onYes: { verdict: "ccp", reasonKey: "haccp.reasons.q2Yes" },
+      onNo: { next: "q3" }
+    },
+    q3: {
+      textKey: "haccp.q3",
+      onYes: { next: "q4" },
+      onNo: { verdict: "notCCP", reasonKey: "haccp.reasons.q3No" }
+    },
+    q4: {
+      textKey: "haccp.q4",
+      onYes: { verdict: "notCCP", reasonKey: "haccp.reasons.q4Yes" },
+      onNo: { verdict: "ccp", reasonKey: "haccp.reasons.q4No" }
+    }
+  };
+
+  const VERDICT_META = {
+    ccp: { boxClass: "result-box warning", labelKey: "haccp.verdictCCP" },
+    notCCP: { boxClass: "result-box", labelKey: "haccp.verdictNotCCP" },
+    modify: { boxClass: "result-box danger", labelKey: "haccp.verdictModify" }
+  };
+
+  let currentNode = "q1";
+  let path = [];
+  let lastRecord = null;
+
+  function fillHazardTypeSelect() {
+    const select = document.getElementById("w-hazard-type");
+    select.innerHTML = ["biological", "chemical", "physical"]
+      .map((type) => `<option value="${type}">${t("haccp.hazardTypes." + type)}</option>`)
+      .join("");
+  }
+
+  function showFieldError(inputId, errorId, error) {
+    const field = document.getElementById(inputId).closest(".field");
+    const errorEl = document.getElementById(errorId);
+    if (error) { field.classList.add("has-error"); errorEl.textContent = error; }
+    else { field.classList.remove("has-error"); errorEl.textContent = ""; }
+  }
+
+  function startWizard() {
+    const stepVal = document.getElementById("w-step").value.trim();
+    const hazardVal = document.getElementById("w-hazard-desc").value.trim();
+    let valid = true;
+    if (!stepVal) { showFieldError("w-step", "w-step-error", t("common.required")); valid = false; }
+    else showFieldError("w-step", "w-step-error", null);
+    if (!hazardVal) { showFieldError("w-hazard-desc", "w-hazard-desc-error", t("common.required")); valid = false; }
+    else showFieldError("w-hazard-desc", "w-hazard-desc-error", null);
+    if (!valid) return;
+
+    currentNode = "q1";
+    path = [];
+    document.getElementById("w-result").hidden = true;
+    document.getElementById("w-question-card").hidden = false;
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const node = TREE[currentNode];
+    const card = document.getElementById("w-question-card");
+    const breadcrumb = path.map((p) => `<div class="ref-note">${t(TREE[p.node].textKey)} → <strong>${t("haccp." + (p.answer ? "yes" : "no"))}</strong></div>`).join("");
+    card.innerHTML = `
+      ${breadcrumb}
+      <h3>${t(node.textKey)}</h3>
+      <div style="display:flex; gap:0.6rem; margin-top:0.8rem;">
+        <button type="button" class="btn btn-secondary" id="q-yes-btn" data-i18n="haccp.yes"></button>
+        <button type="button" class="btn btn-ghost" id="q-no-btn" data-i18n="haccp.no"></button>
+      </div>
+    `;
+    applyI18n(card);
+    document.getElementById("q-yes-btn").addEventListener("click", () => answerQuestion(true));
+    document.getElementById("q-no-btn").addEventListener("click", () => answerQuestion(false));
+  }
+
+  function answerQuestion(value) {
+    const node = TREE[currentNode];
+    const branch = value ? node.onYes : node.onNo;
+    path.push({ node: currentNode, answer: value });
+    if (branch.verdict) {
+      finishWizard(branch.verdict, branch.reasonKey);
+    } else {
+      currentNode = branch.next;
+      renderQuestion();
+    }
+  }
+
+  function finishWizard(verdict, reasonKey) {
+    document.getElementById("w-question-card").hidden = true;
+    const meta = VERDICT_META[verdict];
+    const stepVal = document.getElementById("w-step").value.trim();
+    const hazardType = document.getElementById("w-hazard-type").value;
+    const hazardVal = document.getElementById("w-hazard-desc").value.trim();
+    const reasonText = t(reasonKey);
+
+    const box = document.getElementById("w-result");
+    box.hidden = false;
+    box.className = meta.boxClass;
+    const pathHtml = path.map((p) => `<li>${t(TREE[p.node].textKey)} — <strong>${t("haccp." + (p.answer ? "yes" : "no"))}</strong></li>`).join("");
+    box.innerHTML = `
+      <p class="result-sentence">${t(meta.labelKey)}</p>
+      <p>${reasonText}</p>
+      <details class="how-calc" open>
+        <summary data-i18n="haccp.pathTitle"></summary>
+        <div class="calc-body"><ol>${pathHtml}</ol></div>
+      </details>
+      <div class="no-print" style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1rem;">
+        <button type="button" class="btn btn-secondary btn-sm" id="w-save-btn" data-i18n="haccp.addToLog"></button>
+        <button type="button" class="btn btn-ghost btn-sm" id="w-print-btn" data-i18n="common.printRecord"></button>
+        <button type="button" class="btn btn-ghost btn-sm" id="w-reset-btn" data-i18n="haccp.startOver"></button>
+      </div>
+    `;
+    applyI18n(box);
+
+    lastRecord = {
+      id: uid(),
+      dateTime: formatDateTime(),
+      step: stepVal,
+      hazardType,
+      hazard: hazardVal,
+      verdict,
+      reasonKey,
+      path: path.slice()
+    };
+
+    document.getElementById("w-save-btn").addEventListener("click", () => {
+      const log = loadJSON(STORAGE_KEYS.haccpLog, []);
+      log.unshift(lastRecord);
+      saveJSON(STORAGE_KEYS.haccpLog, log);
+      renderLog();
+    });
+    document.getElementById("w-print-btn").addEventListener("click", () => printLastRecord(lastRecord));
+    document.getElementById("w-reset-btn").addEventListener("click", resetWizard);
+  }
+
+  function resetWizard() {
+    document.getElementById("w-step").value = "";
+    document.getElementById("w-hazard-desc").value = "";
+    document.getElementById("w-question-card").hidden = true;
+    document.getElementById("w-result").hidden = true;
+    showFieldError("w-step", "w-step-error", null);
+    showFieldError("w-hazard-desc", "w-hazard-desc-error", null);
+  }
+
+  function printLastRecord(record) {
+    const pathRows = record.path.map((p) => [t(TREE[p.node].textKey), t("haccp." + (p.answer ? "yes" : "no"))]);
+    printRecordSheet({
+      titleKey: "haccp.pageTitle",
+      rows: [
+        [t("haccp.stepName"), record.step],
+        [t("haccp.hazardType"), t("haccp.hazardTypes." + record.hazardType)],
+        [t("haccp.hazardDesc"), record.hazard],
+        ...pathRows,
+        [t(VERDICT_META[record.verdict].labelKey), t(record.reasonKey)]
+      ]
+    });
+  }
+
+  // -------------------- التبويبات --------------------
+  function setupTabs() {
+    const buttons = document.querySelectorAll(".tab-btn");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+        document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+        if (btn.dataset.tab === "log") renderLog();
+      });
+    });
+  }
+
+  // -------------------- السجل --------------------
+  function renderLog() {
+    const log = loadJSON(STORAGE_KEYS.haccpLog, []);
+    const table = document.getElementById("log-table");
+    const thead = table.querySelector("thead");
+    const tbody = table.querySelector("tbody");
+    const emptyMsg = document.getElementById("log-empty");
+
+    thead.innerHTML = `<tr>
+      <th data-i18n="haccp.logCols.step"></th>
+      <th data-i18n="haccp.logCols.hazard"></th>
+      <th data-i18n="haccp.logCols.verdict"></th>
+      <th data-i18n="haccp.logCols.date"></th>
+      <th class="no-print"></th>
+    </tr>`;
+    applyI18n(thead);
+
+    emptyMsg.hidden = log.length > 0;
+    table.hidden = log.length === 0;
+
+    tbody.innerHTML = log.map((entry) => `
+      <tr>
+        <td>${entry.step}</td>
+        <td>${entry.hazard}</td>
+        <td><span class="status-pill status-${entry.verdict === "ccp" ? "warning" : (entry.verdict === "modify" ? "danger" : "ok")}">${t(VERDICT_META[entry.verdict].labelKey)}</span></td>
+        <td>${entry.dateTime}</td>
+        <td class="no-print"><button type="button" class="btn btn-icon" data-delete="${entry.id}" aria-label="delete">🗑️</button></td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll("[data-delete]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (!confirm(t("common.confirmDelete"))) return;
+        const id = btn.getAttribute("data-delete");
+        const newLog = loadJSON(STORAGE_KEYS.haccpLog, []).filter((e) => e.id !== id);
+        saveJSON(STORAGE_KEYS.haccpLog, newLog);
+        renderLog();
+      });
+    });
+  }
+
+  function wireLogActions() {
+    document.getElementById("log-clear-btn").addEventListener("click", () => {
+      if (!confirm(t("common.confirmClearAll"))) return;
+      saveJSON(STORAGE_KEYS.haccpLog, []);
+      renderLog();
+    });
+    document.getElementById("log-export-btn").addEventListener("click", () => {
+      const log = loadJSON(STORAGE_KEYS.haccpLog, []);
+      const headers = [t("haccp.logCols.step"), t("haccp.logCols.hazard"), t("haccp.logCols.verdict"), t("haccp.logCols.date")];
+      const rows = log.map((e) => [e.step, e.hazard, t(VERDICT_META[e.verdict].labelKey), e.dateTime]);
+      downloadCsv("haccp-log.csv", headers, rows);
+    });
+    document.getElementById("log-print-btn").addEventListener("click", () => window.print());
+  }
+
+  // -------------------- التهيئة --------------------
+  function renderAll() {
+    fillHazardTypeSelect();
+    if (document.getElementById("panel-log").classList.contains("active")) renderLog();
+    if (!document.getElementById("w-question-card").hidden) renderQuestion();
+    if (!document.getElementById("w-result").hidden && lastRecord) finishWizard(lastRecord.verdict, lastRecord.reasonKey);
+  }
+
+  function init() {
+    initApp({ basePath: "../", activeToolId: "haccp" });
+    setupTabs();
+    fillHazardTypeSelect();
+    renderLog();
+
+    document.getElementById("w-start-btn").addEventListener("click", startWizard);
+    document.addEventListener("i18n:change", renderAll);
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
  * sw.js — عامل خدمة بسيط يخزن كل ملفات الموقع مؤقتاً ليعمل بدون إنترنت
  * بعد أول زيارة. عند إضافة أداة جديدة، أضف مسارها إلى PRECACHE_URLS وارفع رقم CACHE_VERSION.
  */
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = "fst-cache-" + CACHE_VERSION;
 
 const PRECACHE_URLS = [
@@ -14,6 +14,9 @@ const PRECACHE_URLS = [
   "./assets/i18n.js",
   "./tools/sanitizer.html",
   "./tools/temperature.html",
+  "./tools/haccp.html",
+  "./tools/risk.html",
+  "./tools/haccp-plan.html",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];

@@ -40,6 +40,17 @@
       <li data-i18n="home.aboutPoint4"></li>
     </ul>
   </section>
+
+  <section class="about-section" aria-labelledby="backup-heading">
+    <h2 id="backup-heading" data-i18n="home.backupTitle"></h2>
+    <p data-i18n="home.backupDesc"></p>
+    <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <button type="button" class="btn btn-secondary btn-sm" id="backupExportBtn" data-i18n="common.backupExport"></button>
+      <button type="button" class="btn btn-ghost btn-sm" id="backupImportBtn" data-i18n="common.backupImport"></button>
+      <input type="file" id="backupFileInput" accept="application/json" hidden>
+    </div>
+    <p class="field-error" id="backupMessage" style="display:none; margin-top:0.6rem;"></p>
+  </section>
 </main>
 
 <div id="app-footer"></div>
@@ -71,8 +82,31 @@
     applyI18n(grid);
   }
 
+  function showBackupMessage(text, isError) {
+    const el = document.getElementById("backupMessage");
+    el.textContent = text;
+    el.style.display = "block";
+    el.style.color = isError ? "var(--color-danger)" : "var(--color-primary)";
+  }
+
+  function wireBackup() {
+    document.getElementById("backupExportBtn").addEventListener("click", exportAllData);
+    document.getElementById("backupImportBtn").addEventListener("click", () => {
+      document.getElementById("backupFileInput").click();
+    });
+    document.getElementById("backupFileInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      importAllData(file, (success) => {
+        showBackupMessage(success ? t("common.backupSuccess") : t("common.backupError"), !success);
+        e.target.value = "";
+      });
+    });
+  }
+
   initApp({ basePath: "" });
   renderToolsGrid();
+  wireBackup();
   document.addEventListener("i18n:change", renderToolsGrid);
 </script>
 </body>

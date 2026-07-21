@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>معالج خطة HACCP</title>
+<meta name="theme-color" content="#0B6E4F">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-page-title-i18n="haccpPlan.pageTitle">
+<a class="skip-link" href="#main-content">تخطي إلى المحتوى / Skip to content</a>
+<div id="app-header"></div>
+
+<main id="main-content">
+  <h1 data-i18n="haccpPlan.pageTitle"></h1>
+  <p data-i18n="haccpPlan.pageDesc"></p>
+
+  <!-- ================= بيانات الخطة ================= -->
+  <div class="card no-print">
+    <h2 data-i18n="haccpPlan.planTitle"></h2>
+    <div class="field-row">
+      <div class="field">
+        <label for="h-product" data-i18n="haccpPlan.header.productName"></label>
+        <input type="text" id="h-product">
+      </div>
+      <div class="field">
+        <label for="h-scope" data-i18n="haccpPlan.header.scope"></label>
+        <input type="text" id="h-scope">
+      </div>
+    </div>
+    <div class="field">
+      <label for="h-team" data-i18n="haccpPlan.header.team"></label>
+      <input type="text" id="h-team">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="h-preparedby" data-i18n="haccpPlan.header.preparedBy"></label>
+        <input type="text" id="h-preparedby">
+      </div>
+      <div class="field">
+        <label for="h-date" data-i18n="haccpPlan.header.date"></label>
+        <input type="date" id="h-date">
+      </div>
+    </div>
+    <button type="button" class="btn btn-secondary" id="h-save-btn" data-i18n="haccpPlan.saveHeader"></button>
+  </div>
+
+  <!-- ================= استيراد من شجرة القرار ================= -->
+  <div class="card no-print" style="margin-top:1rem;">
+    <button type="button" class="btn btn-ghost btn-block" id="import-btn" data-i18n="haccpPlan.importFromTree"></button>
+    <p id="import-message" style="display:none; margin-top:0.6rem; font-weight:700;"></p>
+  </div>
+
+  <!-- ================= نموذج إضافة/تعديل خطوة ================= -->
+  <div class="card no-print" style="margin-top:1rem;">
+    <h2 id="step-form-title" data-i18n="haccpPlan.stepFormTitle"></h2>
+    <input type="hidden" id="s-edit-id">
+    <div class="field-row">
+      <div class="field">
+        <label for="s-step" data-i18n="haccpPlan.fields.step"></label>
+        <input type="text" id="s-step">
+        <div class="field-error" id="s-step-error"></div>
+      </div>
+      <div class="field">
+        <label for="s-hazard" data-i18n="haccpPlan.fields.hazard"></label>
+        <input type="text" id="s-hazard">
+      </div>
+    </div>
+    <div class="field">
+      <label class="radio-chip" style="width:fit-content;">
+        <input type="checkbox" id="s-is-ccp">
+        <span data-i18n="haccpPlan.fields.isCcp"></span>
+      </label>
+    </div>
+    <div class="field">
+      <label for="s-limit" data-i18n="haccpPlan.fields.criticalLimit"></label>
+      <input type="text" id="s-limit">
+    </div>
+    <div class="field">
+      <label for="s-mon-what" data-i18n="haccpPlan.fields.monitoringWhat"></label>
+      <input type="text" id="s-mon-what">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="s-mon-freq" data-i18n="haccpPlan.fields.monitoringFreq"></label>
+        <input type="text" id="s-mon-freq">
+      </div>
+      <div class="field">
+        <label for="s-mon-who" data-i18n="haccpPlan.fields.monitoringWho"></label>
+        <input type="text" id="s-mon-who">
+      </div>
+    </div>
+    <div class="field">
+      <label for="s-corrective" data-i18n="haccpPlan.fields.correctiveAction"></label>
+      <input type="text" id="s-corrective">
+    </div>
+    <div class="field">
+      <label for="s-verification" data-i18n="haccpPlan.fields.verification"></label>
+      <input type="text" id="s-verification">
+    </div>
+    <div class="field">
+      <label for="s-records" data-i18n="haccpPlan.fields.records"></label>
+      <input type="text" id="s-records">
+    </div>
+    <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <button type="button" class="btn btn-primary" id="s-add-btn" data-i18n="haccpPlan.addStep"></button>
+      <button type="button" class="btn btn-ghost" id="s-cancel-btn" data-i18n="common.cancel" hidden></button>
+    </div>
+  </div>
+
+  <!-- ================= قائمة الخطوات ================= -->
+  <div class="card" style="margin-top:1rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">
+      <h2 data-i18n="haccpPlan.stepsListTitle"></h2>
+      <button type="button" class="btn btn-accent btn-sm no-print" id="print-plan-btn" data-i18n="haccpPlan.printPlan"></button>
+    </div>
+    <p id="no-steps-msg" data-i18n="haccpPlan.noSteps" hidden></p>
+    <div id="steps-list"></div>
+  </div>
+
+  <div class="print-only" id="printArea"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="../assets/i18n.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+(function () {
+  function loadPlan() {
+    return loadJSON(STORAGE_KEYS.haccpPlan, { header: {}, steps: [] });
+  }
+
+  function savePlan(plan) {
+    saveJSON(STORAGE_KEYS.haccpPlan, plan);
+  }
+
+  // -------------------- بيانات الخطة (الرأس) --------------------
+  function loadHeaderIntoForm() {
+    const plan = loadPlan();
+    const h = plan.header || {};
+    document.getElementById("h-product").value = h.productName || "";
+    document.getElementById("h-scope").value = h.scope || "";
+    document.getElementById("h-team").value = h.team || "";
+    document.getElementById("h-preparedby").value = h.preparedBy || "";
+    document.getElementById("h-date").value = h.date || "";
+  }
+
+  function saveHeader() {
+    const plan = loadPlan();
+    plan.header = {
+      productName: document.getElementById("h-product").value.trim(),
+      scope: document.getElementById("h-scope").value.trim(),
+      team: document.getElementById("h-team").value.trim(),
+      preparedBy: document.getElementById("h-preparedby").value.trim(),
+      date: document.getElementById("h-date").value
+    };
+    savePlan(plan);
+  }
+
+  // -------------------- استيراد نقاط التحكم من شجرة القرار --------------------
+  function importFromTree() {
+    const haccpLog = loadJSON(STORAGE_KEYS.haccpLog, []);
+    const ccpEntries = haccpLog.filter((e) => e.verdict === "ccp");
+    const plan = loadPlan();
+    const existingKeys = new Set(plan.steps.map((s) => s.step + "|" + s.hazard));
+    let imported = 0;
+
+    ccpEntries.forEach((entry) => {
+      const hazardText = t("haccp.hazardTypes." + entry.hazardType) + " — " + entry.hazard;
+      const key = entry.step + "|" + hazardText;
+      if (existingKeys.has(key)) return;
+      plan.steps.push({
+        id: uid(),
+        step: entry.step,
+        hazard: hazardText,
+        isCcp: true,
+        criticalLimit: "",
+        monitoringWhat: "",
+        monitoringFreq: "",
+        monitoringWho: "",
+        correctiveAction: "",
+        verification: "",
+        records: ""
+      });
+      existingKeys.add(key);
+      imported++;
+    });
+
+    savePlan(plan);
+    renderStepsList();
+
+    const msg = document.getElementById("import-message");
+    msg.style.display = "block";
+    if (imported > 0) {
+      msg.style.color = "var(--color-primary)";
+      msg.textContent = t("haccpPlan.importSuccess").replace("{n}", imported);
+    } else {
+      msg.style.color = "var(--text-muted)";
+      msg.textContent = t("haccpPlan.importEmpty");
+    }
+  }
+
+  // -------------------- نموذج إضافة/تعديل خطوة --------------------
+  function showFieldError(inputId, errorId, error) {
+    const field = document.getElementById(inputId).closest(".field");
+    const errorEl = document.getElementById(errorId);
+    if (error) { field.classList.add("has-error"); errorEl.textContent = error; }
+    else { field.classList.remove("has-error"); errorEl.textContent = ""; }
+  }
+
+  function readStepForm() {
+    return {
+      step: document.getElementById("s-step").value.trim(),
+      hazard: document.getElementById("s-hazard").value.trim(),
+      isCcp: document.getElementById("s-is-ccp").checked,
+      criticalLimit: document.getElementById("s-limit").value.trim(),
+      monitoringWhat: document.getElementById("s-mon-what").value.trim(),
+      monitoringFreq: document.getElementById("s-mon-freq").value.trim(),
+      monitoringWho: document.getElementById("s-mon-who").value.trim(),
+      correctiveAction: document.getElementById("s-corrective").value.trim(),
+      verification: document.getElementById("s-verification").value.trim(),
+      records: document.getElementById("s-records").value.trim()
+    };
+  }
+
+  function clearStepForm() {
+    ["s-step", "s-hazard", "s-limit", "s-mon-what", "s-mon-freq", "s-mon-who", "s-corrective", "s-verification", "s-records"].forEach((id) => {
+      document.getElementById(id).value = "";
+    });
+    document.getElementById("s-is-ccp").checked = false;
+    document.getElementById("s-edit-id").value = "";
+    document.getElementById("s-add-btn").textContent = t("haccpPlan.addStep");
+    document.getElementById("s-cancel-btn").hidden = true;
+    showFieldError("s-step", "s-step-error", null);
+  }
+
+  function addOrUpdateStep() {
+    const data = readStepForm();
+    if (!data.step) { showFieldError("s-step", "s-step-error", t("common.required")); return; }
+    showFieldError("s-step", "s-step-error", null);
+
+    const plan = loadPlan();
+    const editId = document.getElementById("s-edit-id").value;
+
+    if (editId) {
+      const idx = plan.steps.findIndex((s) => s.id === editId);
+      if (idx !== -1) plan.steps[idx] = { id: editId, ...data };
+    } else {
+      plan.steps.push({ id: uid(), ...data });
+    }
+    savePlan(plan);
+    clearStepForm();
+    renderStepsList();
+  }
+
+  function editStep(id) {
+    const plan = loadPlan();
+    const step = plan.steps.find((s) => s.id === id);
+    if (!step) return;
+    document.getElementById("s-edit-id").value = id;
+    document.getElementById("s-step").value = step.step;
+    document.getElementById("s-hazard").value = step.hazard;
+    document.getElementById("s-is-ccp").checked = !!step.isCcp;
+    document.getElementById("s-limit").value = step.criticalLimit;
+    document.getElementById("s-mon-what").value = step.monitoringWhat;
+    document.getElementById("s-mon-freq").value = step.monitoringFreq;
+    document.getElementById("s-mon-who").value = step.monitoringWho;
+    document.getElementById("s-corrective").value = step.correctiveAction;
+    document.getElementById("s-verification").value = step.verification;
+    document.getElementById("s-records").value = step.records;
+    document.getElementById("s-add-btn").textContent = t("haccpPlan.updateStep");
+    document.getElementById("s-cancel-btn").hidden = false;
+    document.getElementById("step-form-title").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function deleteStep(id) {
+    if (!confirm(t("common.confirmDelete"))) return;
+    const plan = loadPlan();
+    plan.steps = plan.steps.filter((s) => s.id !== id);
+    savePlan(plan);
+    renderStepsList();
+  }
+
+  // -------------------- عرض قائمة الخطوات --------------------
+  function fieldRow(labelKey, value) {
+    if (!value) return "";
+    return `<div><strong>${t(labelKey)}:</strong> ${value}</div>`;
+  }
+
+  function renderStepsList() {
+    const plan = loadPlan();
+    const container = document.getElementById("steps-list");
+    const emptyMsg = document.getElementById("no-steps-msg");
+    emptyMsg.hidden = plan.steps.length > 0;
+
+    container.innerHTML = plan.steps.map((step, index) => `
+      <div class="card" style="margin-top:${index === 0 ? "0" : "0.8rem"};">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+          <h3 style="margin:0;">${index + 1}. ${step.step}</h3>
+          <span class="status-pill ${step.isCcp ? "status-warning" : "status-ok"}">${step.isCcp ? t("haccpPlan.ccpBadge") : t("haccpPlan.notCcpBadge")}</span>
+        </div>
+        <div style="margin-top:0.6rem; font-size:0.92rem; display:grid; gap:0.3rem;">
+          ${fieldRow("haccpPlan.fields.hazard", step.hazard)}
+          ${fieldRow("haccpPlan.fields.criticalLimit", step.criticalLimit)}
+          ${fieldRow("haccpPlan.fields.monitoringWhat", step.monitoringWhat)}
+          ${fieldRow("haccpPlan.fields.monitoringFreq", step.monitoringFreq)}
+          ${fieldRow("haccpPlan.fields.monitoringWho", step.monitoringWho)}
+          ${fieldRow("haccpPlan.fields.correctiveAction", step.correctiveAction)}
+          ${fieldRow("haccpPlan.fields.verification", step.verification)}
+          ${fieldRow("haccpPlan.fields.records", step.records)}
+        </div>
+        <div class="no-print" style="display:flex; gap:0.5rem; margin-top:0.8rem;">
+          <button type="button" class="btn btn-ghost btn-sm" data-edit="${step.id}" data-i18n="common.edit"></button>
+          <button type="button" class="btn btn-danger btn-sm" data-delete="${step.id}" data-i18n="common.delete"></button>
+        </div>
+      </div>
+    `).join("");
+    applyI18n(container);
+
+    container.querySelectorAll("[data-edit]").forEach((btn) => btn.addEventListener("click", () => editStep(btn.getAttribute("data-edit"))));
+    container.querySelectorAll("[data-delete]").forEach((btn) => btn.addEventListener("click", () => deleteStep(btn.getAttribute("data-delete"))));
+  }
+
+  // -------------------- طباعة الخطة كاملة --------------------
+  function printPlan() {
+    const plan = loadPlan();
+    const h = plan.header || {};
+    const area = document.getElementById("printArea");
+
+    const headerRows = [
+      [t("haccpPlan.header.productName"), h.productName || ""],
+      [t("haccpPlan.header.scope"), h.scope || ""],
+      [t("haccpPlan.header.team"), h.team || ""],
+      [t("haccpPlan.header.preparedBy"), h.preparedBy || ""],
+      [t("haccpPlan.header.date"), h.date || ""]
+    ].map(([label, value]) => `<tr><th>${label}</th><td>${value}</td></tr>`).join("");
+
+    const stepsHtml = plan.steps.map((step, index) => `
+      <h3>${index + 1}. ${step.step} ${step.isCcp ? "— " + t("haccpPlan.ccpBadge") : ""}</h3>
+      <table>
+        <tbody>
+          <tr><th>${t("haccpPlan.fields.hazard")}</th><td>${step.hazard}</td></tr>
+          <tr><th>${t("haccpPlan.fields.criticalLimit")}</th><td>${step.criticalLimit}</td></tr>
+          <tr><th>${t("haccpPlan.fields.monitoringWhat")}</th><td>${step.monitoringWhat}</td></tr>
+          <tr><th>${t("haccpPlan.fields.monitoringFreq")}</th><td>${step.monitoringFreq}</td></tr>
+          <tr><th>${t("haccpPlan.fields.monitoringWho")}</th><td>${step.monitoringWho}</td></tr>
+          <tr><th>${t("haccpPlan.fields.correctiveAction")}</th><td>${step.correctiveAction}</td></tr>
+          <tr><th>${t("haccpPlan.fields.verification")}</th><td>${step.verification}</td></tr>
+          <tr><th>${t("haccpPlan.fields.records")}</th><td>${step.records}</td></tr>
+        </tbody>
+      </table>
+    `).join("");
+
+    area.innerHTML = `
+      <h1>${t("haccpPlan.planTitle")}</h1>
+      <table><tbody>${headerRows}</tbody></table>
+      ${stepsHtml}
+      <div class="record-sign-line">
+        <div class="sign-block">${t("common.executedBy")}</div>
+        <div class="sign-block">${t("common.signature")}</div>
+        <div class="sign-block">${t("common.recordDate")}</div>
+      </div>
+    `;
+    window.print();
+  }
+
+  // -------------------- التهيئة --------------------
+  function renderAll() {
+    renderStepsList();
+  }
+
+  function init() {
+    initApp({ basePath: "../", activeToolId: "haccpPlan" });
+    loadHeaderIntoForm();
+    renderStepsList();
+
+    document.getElementById("h-save-btn").addEventListener("click", saveHeader);
+    document.getElementById("import-btn").addEventListener("click", importFromTree);
+    document.getElementById("s-add-btn").addEventListener("click", addOrUpdateStep);
+    document.getElementById("s-cancel-btn").addEventListener("click", clearStepForm);
+    document.getElementById("print-plan-btn").addEventListener("click", printPlan);
+
+    document.addEventListener("i18n:change", renderAll);
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>

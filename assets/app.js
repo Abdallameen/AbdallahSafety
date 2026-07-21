@@ -11,17 +11,28 @@
 const TOOLS_REGISTRY = [
   { id: "sanitizer",   icon: "🧴", href: "tools/sanitizer.html",   available: true },
   { id: "temperature", icon: "🌡️", href: "tools/temperature.html", available: true },
-  { id: "haccp",       icon: "🌳", href: "#",                       available: false },
-  { id: "risk",        icon: "📊", href: "#",                       available: false },
-  { id: "haccpPlan",   icon: "📋", href: "#",                       available: false }
+  { id: "haccp",       icon: "🌳", href: "tools/haccp.html",       available: true },
+  { id: "risk",        icon: "📊", href: "tools/risk.html",        available: true },
+  { id: "haccpPlan",   icon: "📋", href: "tools/haccp-plan.html",  available: true }
 ];
 
 // -------------------- مفاتيح التخزين المحلي --------------------
 const STORAGE_KEYS = {
   lang: "fst_lang",
   theme: "fst_theme",
-  sanitizerLog: "fst_sanitizer_log"
+  sanitizerLog: "fst_sanitizer_log",
+  haccpLog: "fst_haccp_log",
+  riskLog: "fst_risk_log",
+  haccpPlan: "fst_haccp_plan"
 };
+
+// كل مفاتيح بيانات المستخدم القابلة للنسخ الاحتياطي (تُستثنى منها اللغة والثيم فقط)
+const BACKUP_KEYS = [
+  STORAGE_KEYS.sanitizerLog,
+  STORAGE_KEYS.haccpLog,
+  STORAGE_KEYS.riskLog,
+  STORAGE_KEYS.haccpPlan
+];
 
 // -------------------- حالة اللغة --------------------
 function getLang() {
@@ -109,6 +120,7 @@ function renderHeader(basePath, activeToolId) {
       </a>
       <nav class="header-actions" aria-label="header navigation">
         ${activeToolId ? `<a class="btn btn-ghost btn-sm" href="${basePath}index.html" data-i18n="nav.back"></a>` : ""}
+        <button type="button" id="installAppBtn" class="btn btn-accent btn-sm" data-i18n="common.installApp" hidden></button>
         <button type="button" id="themeToggleBtn" class="btn btn-icon" aria-label="toggle theme">${getTheme() === "dark" ? "☀️" : "🌙"}</button>
         <button type="button" id="langToggleBtn" class="btn btn-ghost btn-sm" data-i18n="nav.langToggle"></button>
       </nav>
@@ -116,6 +128,9 @@ function renderHeader(basePath, activeToolId) {
   `;
   document.getElementById("themeToggleBtn").addEventListener("click", toggleTheme);
   document.getElementById("langToggleBtn").addEventListener("click", toggleLang);
+  const installBtn = document.getElementById("installAppBtn");
+  installBtn.hidden = !deferredInstallPrompt;
+  installBtn.addEventListener("click", installApp);
 }
 
 function renderFooter() {
@@ -146,6 +161,69 @@ function registerServiceWorker(basePath) {
   if (!("serviceWorker" in navigator)) return;
   if (location.protocol === "file:") return;
   navigator.serviceWorker.register(basePath + "sw.js").catch(() => {});
+}
+
+// -------------------- تثبيت التطبيق (PWA) --------------------
+let deferredInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.hidden = false;
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.hidden = true;
+});
+
+function installApp() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.finally(() => {
+    deferredInstallPrompt = null;
+    const btn = document.getElementById("installAppBtn");
+    if (btn) btn.hidden = true;
+  });
+}
+
+// -------------------- النسخ الاحتياطي (تصدير/استيراد كل بيانات المستخدم) --------------------
+function exportAllData() {
+  const data = {};
+  BACKUP_KEYS.forEach((key) => {
+    const raw = localStorage.getItem(key);
+    if (raw) data[key] = JSON.parse(raw);
+  });
+  const payload = { exportedAt: formatDateTime(), data };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "food-safety-toolkit-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importAllData(file, onDone) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const data = parsed.data || parsed;
+      BACKUP_KEYS.forEach((key) => {
+        if (data[key] !== undefined) localStorage.setItem(key, JSON.stringify(data[key]));
+      });
+      onDone(true);
+    } catch (e) {
+      onDone(false);
+    }
+  };
+  reader.onerror = () => onDone(false);
+  reader.readAsText(file);
 }
 
 // -------------------- تخزين محلي عام --------------------

@@ -472,7 +472,23 @@ tr:hover td { background: rgba(43, 182, 115, 0.06); }
 }
 .status-ok { background: rgba(43, 182, 115, 0.15); color: var(--color-primary-dark); }
 .status-warning { background: rgba(244, 180, 0, 0.2); color: #6b5200; }
+.status-orange { background: rgba(230, 126, 20, 0.2); color: #7a3e00; }
 .status-danger { background: rgba(217, 48, 37, 0.15); color: var(--color-danger); }
+
+/* -------------------- مصفوفة المخاطر (خريطة حرارية) -------------------- */
+.matrix-table { border-collapse: collapse; width: 100%; min-width: 520px; }
+.matrix-table th, .matrix-table td {
+  text-align: center;
+  padding: 0.6em;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.matrix-table th { background: var(--bg-elevated); }
+.matrix-cell-low { background: rgba(43, 182, 115, 0.35); }
+.matrix-cell-medium { background: rgba(244, 180, 0, 0.4); }
+.matrix-cell-high { background: rgba(230, 126, 20, 0.45); }
+.matrix-cell-critical { background: rgba(217, 48, 37, 0.45); color: #fff; }
 
 /* -------------------- سجل الطباعة -------------------- */
 .print-only { display: none; }
